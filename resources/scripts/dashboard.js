@@ -29,9 +29,14 @@ function InternetHealthTest() {
     'finished_meta': 'Finished',
     'finished_all': 'Complete'
   };
+  this.RESULTS_TO_DISPLAY = {
+    's2cRate': 'Download',
+    'c2sRate': 'Upload',
+    'MinRTT': 'Latency'
+  };
   this.domObjects = {
     'performance_meter': this.canvas.find('.performance_meter'),
-    'result_list': this.canvas.find('.dashboard__result_list'),
+    'result_list': this.canvas.find('.dashboard__result_list .ui-collapsible-set'),
     'start_button': this.canvas.find('.dashboard__start_button'),
     'server_list': this.canvas.find('.select__server_location'),
     'historical_information': this.canvas.find('.historical_information')
@@ -57,6 +62,7 @@ function InternetHealthTest() {
 
 InternetHealthTest.prototype.setupInterface = function () {
   var that = this;
+  this.domObjects.start_button.focus();
   this.domObjects.performance_meter.percentageLoader({value: 'Upload'});
   this.domObjects.performance_meter.find('div div').text('Start');
 
@@ -83,9 +89,31 @@ InternetHealthTest.prototype.setlocalStorage = function (historicalData) {
   var historicalDataString = JSON.stringify(historicalData);
   localStorage.setItem(this.LOCALSTORAGE_KEY, historicalDataString);
 };
+
 InternetHealthTest.prototype.populateHistoricalData = function (historicalData) {
   var historicalDataSize = 'Past Tests (' + historicalData.length + ')';
   this.domObjects.historical_information.text(historicalDataSize);
+};
+
+InternetHealthTest.prototype.populateResultData = function (siteId, passedResults) {
+  var siteIdClass = '.' + siteId;
+  var thisListView = this.domObjects.result_list.find(siteIdClass).find('ul');
+  var testResultItem, testResultValueString;
+
+  this.domObjects.result_list.find(siteIdClass).removeClass('ui-disabled');
+  for (var testResultValue in this.RESULTS_TO_DISPLAY) {
+    if (this.RESULTS_TO_DISPLAY.hasOwnProperty(testResultValue)) {
+      testResultValueString = this.formatMeasurementResult(testResultValue,
+        passedResults[testResultValue]);
+      testResultItem = $('<li>').text(this.RESULTS_TO_DISPLAY[testResultValue]);
+      testResultItem.append($('<span>')
+        .addClass('ui-li-count')
+        .text(testResultValueString));
+      thisListView.append(testResultItem);
+    }
+  }
+  thisListView.listview().listview('refresh');
+  this.domObjects.result_list.collapsibleset('refresh');
 };
 
 InternetHealthTest.prototype.findServers = function () {
@@ -176,7 +204,7 @@ InternetHealthTest.prototype.runServerQueue = function () {
 InternetHealthTest.prototype.runTest = function (currentServer) {
   this.isRunning = true;
   this.ndtClient = new NDTjs(currentServer.address,
-    currentServer.port, currentServer.path, this, 1000);
+    currentServer.port, currentServer.path, this, 100);
   this.ndtClient.results.metadata = currentServer;
   this.ndtClient.results.siteId = currentServer.id;
   this.notifyTestStart(currentServer);
@@ -226,6 +254,7 @@ InternetHealthTest.prototype.notifyTestCompletion = function (siteId, passedResu
   this.changeRowIcon(siteId, 'check');
   this.changeRowHighlight(siteId, false);
   this.changeRowResults(siteId, passedResults);
+  this.populateResultData(siteId, passedResults);
   this.populateHistoricalData(this.historicalData);
 };
 
@@ -279,14 +308,20 @@ InternetHealthTest.prototype.notifyServerListUpdate = function (serverList) {
   this.domObjects.server_list.append(temporaryRow);
 
   serverList.forEach(function (siteRecord) {
-    temporaryRow = $("<li>")
-      .attr('data-icon', 'clock')
+    temporaryRow = $("<div>")
+      .attr('data-collapsed-icon', 'clock')
+      .attr('data-iconpos', 'right')
+      .attr('data-role', 'collapsible')
       .addClass('provider')
-      .addClass(siteRecord.id)
-      .append($("<a>").text(siteRecord.transit));
+      .addClass('ui-disabled')
+      .addClass(siteRecord.id);
+    temporaryRow.append($("<h3>").text(siteRecord.transit));
+    temporaryRow.append($("<ul>")
+      .attr('data-role-icon', 'listview')
+      .attr('data-theme', 'a'));
     that.domObjects.result_list.append(temporaryRow);
   });
-  this.domObjects.result_list.listview('refresh');
+  this.domObjects.result_list.collapsibleset('refresh');
 };
 
 InternetHealthTest.prototype.resetDashboard = function () {
@@ -313,20 +348,24 @@ InternetHealthTest.prototype.notifyStateChange = function (newState, passedResul
     this.changeRowIcon(passedResults.metadata.id, 'arrow-d');
   } else if (newState === 'running_c2s') {
     this.changeRowIcon(passedResults.metadata.id, 'arrow-u');
+  } else if (newState === 'preparing_s2c' || newState === 'preparing_c2s' ||
+      newState === 'preparing_meta') {
+    this.domObjects.performance_meter.find('div div').text('Preparing');
   }
+
 };
 
 InternetHealthTest.prototype.changeRowIcon = function (rowId, newIcon) {
   var rowIdClass = '.' + rowId,
-    dataIcon = this.domObjects.result_list.find(rowIdClass).attr('data-icon'),
+    dataIcon = this.domObjects.result_list.find(rowIdClass).attr('data-collapsed-icon'),
     oldIconClass = 'ui-icon-' + dataIcon,
     newIconClass = 'ui-icon-' + newIcon;
   this.domObjects.result_list.find(rowIdClass)
-      .attr('data-icon', newIcon)
+      .attr('data-collapsed-icon', newIcon)
       .find('.ui-btn')
         .removeClass(oldIconClass)
         .addClass(newIconClass);
-  this.domObjects.result_list.listview('refresh');
+  this.domObjects.result_list.collapsibleset('refresh');
 };
 
 InternetHealthTest.prototype.changeRowHighlight = function (rowId, highlighted) {
@@ -338,6 +377,15 @@ InternetHealthTest.prototype.changeRowHighlight = function (rowId, highlighted) 
   }
 };
 
+InternetHealthTest.prototype.formatMeasurementResult = function (resultType,
+    resultValue) {
+  if (resultType === 's2cRate' || resultType === 'c2sRate') {
+    return Number(resultValue / 1000).toFixed(2) + ' Mbps';
+  } else if (resultType === 'MinRTT') {
+    return Number(resultValue).toFixed(2) + ' ms';
+  }
+  return undefined;
+};
 
 InternetHealthTest.prototype.changeRowResults = function (rowId, passedResults) {
   var resultsElement;

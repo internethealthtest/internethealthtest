@@ -26,23 +26,27 @@
                 </div>
                 <div class="container__dashboard ui-block-b">
                     <div class="ui-grid-a">
-                        <div class="ui-block-a"><input type="button" value="Start Test" class="dashboard__start_button"></div>
+                        <div class="ui-block-a">
+							<input type="button" value="Start Test" class="dashboard__start_button">
+						</div>
                         <div class="ui-block-b">
                             <button class="ui-btn ui-btn-inline historical_information" disabled="disabled"></button>
                             <select name="select-choice-mini" class="select__server_location" data-mini="true" data-inline="true" disabled="disabled"></select>
                         </div>
                     </div>
-                    <ul class="dashboard__result_list" data-role="listview" data-inset="true">
-                        <li data-role="list-divider">Results</li>
-                    </ul>
+					<div class="dashboard__result_list">
+						<div data-role="collapsible-set" data-theme="a" data-content-theme="a"></div>
+					</div>
                 </div>
             </div>
-            <div data-role="footer" data-position="fixed"><small>
-                This test will share data with third parties for the purpose of
-                facilitating research, to learn more about the data collected
-                see the
-                <a href="http://www.measurementlab.net/privacy">Privacy
-                Policy</a>.</small>
+            <div data-role="footer" data-position="fixed">
+				<small>
+					This test will share data with third parties for the purpose of
+					facilitating research, to learn more about the data collected
+					see the
+					<a href="http://www.measurementlab.net/privacy">Privacy
+					Policy</a>.
+				</small>
             </div>
         </div>
     </body>

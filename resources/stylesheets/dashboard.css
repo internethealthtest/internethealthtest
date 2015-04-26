@@ -24,6 +24,9 @@
 .header-icon {
     height: 1em;
 }
+.ui-collapsible-set .ui-li-count {
+  margin-right: 3em;
+}
 
 .canvas .content_panel {
     display: block;
