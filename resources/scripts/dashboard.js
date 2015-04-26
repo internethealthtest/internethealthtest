@@ -108,7 +108,7 @@ InternetHealthTest.prototype.findServers = function () {
 
 InternetHealthTest.prototype.findMoreServers = function (mlabNsAnwer) {
   var mlabSiteListRequest = new XMLHttpRequest();
-  var mlabSiteListURL = "/resources/datasets/site_list.json";
+  var mlabSiteListURL = "resources/datasets/site_list.json";
   var that = this;
   var constructedRecord;
 
