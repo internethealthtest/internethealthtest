@@ -64,12 +64,15 @@ function InternetHealthTest() {
 
 InternetHealthTest.prototype.setupInterface = function () {
   var that = this;
+  this.domObjects.intro_overlay.popup();
+  this.domObjects.start_button.button();
+  
   this.domObjects.start_button.button('enable');
   this.domObjects.start_button.focus();
-  this.domObjects.intro_overlay.popup('open');
   this.domObjects.performance_meter.percentageLoader({value: 'Upload'});
   this.domObjects.performance_meter.find('div div').text('Start');
   this.domObjects.performance_meter.addClass('test_control_enabled');
+  this.domObjects.intro_overlay.popup('open');
 
   this.domObjects.start_button.click(function () {
     that.domObjects.intro_overlay.popup('close');
