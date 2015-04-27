@@ -16,11 +16,28 @@
         <div data-role="page" class="canvas">
             <div data-role="header" data-icon="internethealth" data-theme="a">
                 <h1>
-                    <img src="resources/images/network_love.png" class="header-icon">
+                    <img src="resources/images/network.svg" class="header-icon">
                     Internet Health Test
                 </h1>
             </div>
             <div role="main" class="ui-content content_panel ui-grid-a">
+<div data-role="popup" data-overlay-theme="a" class="ui-content intro_overlay">
+	<div class="ui-grid-a">
+		<div class="ui-block-a"><img src="resources/images/network.svg" class="intro_overlay_icon"/>
+		</div>
+		<div class="ui-block-b">
+<h3>Welcome to the Internet Health Test!</h3>
+
+The Health Test perform simple tests to a diverse set of servers located near you compare how your broadband connection varies to different parts of the Internet. These measurements are short speed tests and do not collect personal information from your browser.
+<br />
+<br />
+<input type="button" value="Start Test" class="dashboard__start_button">
+<br />
+<small>To learn more about the data collected see the <a href="http://www.measurementlab.net/privacy">Privacy Policy</a>.</small>
+		</div>
+	</div>
+
+</div>
                 <div class="container__performance_meter ui-block-a">
                     <div class="performance_meter"></div>
                 </div>
@@ -30,23 +47,13 @@
 							<input type="button" value="Start Test" class="dashboard__start_button">
 						</div>
                         <div class="ui-block-b">
-                            <select name="select-choice" class="select__server_location" data-inline="true" disabled="disabled"></select>
+                            <h3 class="select__server_location"></h3>
                         </div>
                     </div>
 					<div class="dashboard__result_list">
 						<div data-role="collapsible-set" data-theme="a" data-content-theme="a"></div>
 					</div>
-					<button class="ui-btn ui-btn-inline historical_information" disabled="disabled"></button>
                 </div>
-            </div>
-            <div data-role="footer" data-position="fixed">
-				<small>
-					This test will share data with third parties for the purpose of
-					facilitating research, to learn more about the data collected
-					see the
-					<a href="http://www.measurementlab.net/privacy">Privacy
-					Policy</a>.
-				</small>
             </div>
         </div>
     </body>

@@ -35,7 +35,9 @@ function InternetHealthTest() {
     'MinRTT': 'Latency'
   };
   this.domObjects = {
+    'intro_overlay': this.canvas.find('.intro_overlay'),
     'performance_meter': this.canvas.find('.performance_meter'),
+    'performance_meter_objects': this.canvas.find('.performance_meter div'),
     'result_list': this.canvas.find('.dashboard__result_list .ui-collapsible-set'),
     'start_button': this.canvas.find('.dashboard__start_button'),
     'server_list': this.canvas.find('.select__server_location'),
@@ -62,15 +64,27 @@ function InternetHealthTest() {
 
 InternetHealthTest.prototype.setupInterface = function () {
   var that = this;
+  this.domObjects.start_button.button('enable');
   this.domObjects.start_button.focus();
+  this.domObjects.intro_overlay.popup('open');
   this.domObjects.performance_meter.percentageLoader({value: 'Upload'});
   this.domObjects.performance_meter.find('div div').text('Start');
+  this.domObjects.performance_meter.addClass('test_control_enabled');
 
   this.domObjects.start_button.click(function () {
+    that.domObjects.intro_overlay.popup('close');
     if (that.resultList.length > 0) {
       that.resetDashboard();
     }
     that.runServerQueue();
+  });
+  this.domObjects.performance_meter.click(function () {
+    if (that.domObjects.performance_meter.hasClass('test_control_enabled') === true) {
+      if (that.resultList.length > 0) {
+        that.resetDashboard();
+      }
+      that.runServerQueue();
+    }
   });
   
   $.merge(this.historicalData, this.getlocalStorage());
@@ -251,7 +265,7 @@ InternetHealthTest.prototype.notifyTestStart = function (currentServer) {
 };
 
 InternetHealthTest.prototype.notifyTestCompletion = function (siteId, passedResults) {
-  this.changeRowIcon(siteId, 'check');
+  this.changeRowIcon(siteId, 'plus');
   this.changeRowHighlight(siteId, false);
   this.changeRowResults(siteId, passedResults);
   this.populateResultData(siteId, passedResults);
@@ -260,10 +274,13 @@ InternetHealthTest.prototype.notifyTestCompletion = function (siteId, passedResu
 
 InternetHealthTest.prototype.notifyServerQueueStart = function () {
   this.domObjects.start_button.button('disable');
+  this.domObjects.performance_meter.removeClass('test_control_enabled');
 };
 
 InternetHealthTest.prototype.notifyServerQueueCompletion = function () {
+  this.domObjects.performance_meter.addClass('test_control_enabled');
   this.domObjects.performance_meter.percentageLoader({value: 'Complete'});
+  this.domObjects.performance_meter.addClass('test_control_enabled');
   this.domObjects.start_button.val('Test Again').button('refresh');
   this.domObjects.start_button.button('enable');
   this.notifyResultListUpdate();
@@ -300,20 +317,17 @@ InternetHealthTest.prototype.notifyServerListUpdate = function (serverList) {
   var that = this;
   var temporaryRow;
 
-  this.domObjects.server_list.html('');
-  temporaryRow = $('<option>')
-    .text(this.mlabNsAnwer.city.replace('_', ' '))
-    .val(this.mlabNsAnwer.metro)
-    .attr('selected', 'true');
-  this.domObjects.server_list.append(temporaryRow);
+  this.domObjects.server_list.text(this.mlabNsAnwer.city.replace('_', ' '));
 
   serverList.forEach(function (siteRecord) {
     temporaryRow = $("<div>")
-      .attr('data-collapsed-icon', 'clock')
+      .attr('data-collapsed-icon', 'plus')
+      .attr('data-expanded-icon', 'minus')
       .attr('data-iconpos', 'right')
       .attr('data-role', 'collapsible')
       .addClass('provider')
       .addClass('ui-disabled')
+      .addClass('ui-icon-clock')
       .addClass(siteRecord.id);
     temporaryRow.append($("<h3>").text(siteRecord.transit));
     temporaryRow.append($("<ul>")
@@ -322,6 +336,8 @@ InternetHealthTest.prototype.notifyServerListUpdate = function (serverList) {
     that.domObjects.result_list.append(temporaryRow);
   });
   this.domObjects.result_list.collapsibleset('refresh');
+  this.domObjects.result_list.find('a.ui-icon-plus').removeClass('ui-icon-plus').addClass('ui-icon-clock')
+
 };
 
 InternetHealthTest.prototype.resetDashboard = function () {
@@ -337,9 +353,17 @@ InternetHealthTest.prototype.notifyResultListUpdate = function () {
 };
 
 InternetHealthTest.prototype.notifyStateChange = function (newState, passedResults) {
-  var testProgressText = this.NDT_STATUS_LABELS[newState];
 
   this.resetProgressMeter();
+  
+  if (newState === 'preparing_s2c' || newState === 'preparing_c2s') {
+    this.domObjects.performance_meter.find('div div').first().css('font', '40px BebasNeueRegular')
+    this.domObjects.performance_meter.find('div div').text('Preparing');
+  } else if (newState === 'preparing_meta' || newState === 'running_meta') {
+    this.domObjects.performance_meter.find('div div').first().css('font', '40px BebasNeueRegular')
+    this.domObjects.performance_meter.find('div div').text('Submitting');
+  }
+
   if (newState === 'finished_s2c' || newState === 'finished_c2s' ||
       newState === 'finished_all' || newState === 'finished_meta') {
     this.setProgressMeterCompleted();
@@ -348,11 +372,7 @@ InternetHealthTest.prototype.notifyStateChange = function (newState, passedResul
     this.changeRowIcon(passedResults.metadata.id, 'arrow-d');
   } else if (newState === 'running_c2s') {
     this.changeRowIcon(passedResults.metadata.id, 'arrow-u');
-  } else if (newState === 'preparing_s2c' || newState === 'preparing_c2s' ||
-      newState === 'preparing_meta') {
-    this.domObjects.performance_meter.find('div div').text('Preparing');
   }
-
 };
 
 InternetHealthTest.prototype.changeRowIcon = function (rowId, newIcon) {
@@ -363,6 +383,7 @@ InternetHealthTest.prototype.changeRowIcon = function (rowId, newIcon) {
   this.domObjects.result_list.find(rowIdClass)
       .attr('data-collapsed-icon', newIcon)
       .find('.ui-btn')
+        .removeClass('ui-icon-clock')
         .removeClass(oldIconClass)
         .addClass(newIconClass);
   this.domObjects.result_list.collapsibleset('refresh');
@@ -403,6 +424,8 @@ InternetHealthTest.prototype.setProgressMeterCompleted = function () {
 
 InternetHealthTest.prototype.resetProgressMeter = function () {
   this.domObjects.performance_meter.removeClass('reversed');
+  this.domObjects.performance_meter.find('div div').text('');
+  this.domObjects.performance_meter.find('div div').first().css('font', '64px BebasNeueRegular')
 };
 
 InternetHealthTest.prototype.setProgressMeterReversed = function () {

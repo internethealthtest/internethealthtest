@@ -47,15 +47,46 @@
     position: relative;
     float: left;
 }
+
+.canvas .content_panel .container__performance_meter .performance_meter .smalltext {
+    font-size: .6em;
+}
+
 .canvas .content_panel .container__performance_meter .performance_meter div {
     margin-right: 0px;
     margin: 0 auto;
 }
+
+.canvas .content_panel .container__performance_meter .performance_meter .test_control_enabled {
+    cursor: pointer;
+}
+
+.canvas .content_panel .container__performance_meter .performance_meter .test_control_enabled :hover {
+    cursor: pointer;
+}
+
 .canvas .content_panel .container__dashboard {
+
 }
-.canvas small {
-    font-size: .4em;
+
+.canvas .ui-grid-a .ui-block-a {
+    text-align: center;
 }
+.canvas .ui-grid-a .ui-block-a .intro_overlay_icon {
+    height: 20em;
+}
+
+.canvas .select__server_location {
+  color: rgb(175, 175, 175);
+  font-family: sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: right;
+  margin-right: 20px;
+  text-decoration: none;
+  text-shadow: rgb(243, 243, 243) 0px 1px 0px;
+}
+
 .canvas .performance_meter.reversed canvas {
     -moz-transform: scaleX(-1);
     -o-transform: scaleX(-1);
