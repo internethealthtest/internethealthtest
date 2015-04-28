@@ -42,7 +42,8 @@ function InternetHealthTest() {
     'start_button': this.canvas.find('.dashboard__start_button'),
     'server_list': this.canvas.find('.select__server_location'),
     'historical_information': this.canvas.find('.historical_information'),
-    'about_button': this.canvas.find('.intro_overlay_about')
+    'about_button': this.canvas.find('.intro_overlay_about'),
+    'supported_browser_dialogue': this.canvas.find('.supported_browser_dialogue')
   };
   this.spinnerOpts = {
     lines: 13, // The number of lines to draw
@@ -67,6 +68,7 @@ InternetHealthTest.prototype.setupInterface = function () {
   var that = this;
   this.domObjects.intro_overlay.popup();
   this.domObjects.start_button.button();
+  this.domObjects.supported_browser_dialogue.popup();
   
   this.domObjects.start_button.button('enable');
   this.domObjects.start_button.focus();
@@ -226,13 +228,20 @@ InternetHealthTest.prototype.runServerQueue = function () {
 };
 
 InternetHealthTest.prototype.runTest = function (currentServer) {
-  this.isRunning = true;
   this.ndtClient = new NDTjs(currentServer.address,
-    currentServer.port, currentServer.path, this, 100);
+      currentServer.port, currentServer.path, this, 100);
+
+  try {
+    this.ndtClient.checkBrowserSupport();
+  } catch(thrownError) {
+    this.domObjects.supported_browser_dialogue.popup('open');
+  }
+
   this.ndtClient.results.metadata = currentServer;
   this.ndtClient.results.siteId = currentServer.id;
   this.notifyTestStart(currentServer);
   this.ndtClient.startTest();
+  this.isRunning = true;
 };
 
 InternetHealthTest.prototype.onstart = function () { return false; };
