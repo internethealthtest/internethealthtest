@@ -41,7 +41,8 @@ function InternetHealthTest() {
     'result_list': this.canvas.find('.dashboard__result_list .ui-collapsible-set'),
     'start_button': this.canvas.find('.dashboard__start_button'),
     'server_list': this.canvas.find('.select__server_location'),
-    'historical_information': this.canvas.find('.historical_information')
+    'historical_information': this.canvas.find('.historical_information'),
+    'about_button': this.canvas.find('.intro_overlay_about')
   };
   this.spinnerOpts = {
     lines: 13, // The number of lines to draw
@@ -95,7 +96,9 @@ InternetHealthTest.prototype.setupInterface = function () {
       that.runServerQueue();
     }
   });
-  
+  this.domObjects.about_button.click(function () {
+      that.domObjects.intro_overlay.popup('open');
+  });
 };
 
 InternetHealthTest.prototype.getlocalStorage = function () {
