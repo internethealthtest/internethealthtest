@@ -43,7 +43,8 @@ function InternetHealthTest() {
     'server_list': this.canvas.find('.select__server_location'),
     'historical_information': this.canvas.find('.historical_information'),
     'about_button': this.canvas.find('.intro_overlay_about'),
-    'supported_browser_dialogue': this.canvas.find('.supported_browser_dialogue')
+    'supported_browser_dialogue': this.canvas.find('.supported_browser_dialogue'),
+    'completion_notice': this.canvas.find('.dashboard__thank_you')
   };
   this.spinnerOpts = {
     lines: 13, // The number of lines to draw
@@ -302,6 +303,7 @@ InternetHealthTest.prototype.notifyServerQueueCompletion = function () {
   this.domObjects.performance_meter.addClass('test_control_enabled');
   this.domObjects.start_button.val('Test Again').button('refresh');
   this.domObjects.start_button.button('enable');
+  this.domObjects.completion_notice.show();
   this.notifyResultListUpdate();
 };
 

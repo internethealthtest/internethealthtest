@@ -122,6 +122,13 @@
   text-shadow: rgb(243, 243, 243) 0px 1px 0px;
 }
 
+.canvas .dashboard__thank_you {
+    display: none;
+}
+.canvas .dashboard__thank_you input {
+    background: rgb(133, 232, 118);
+}
+
 .canvas .performance_meter.reversed canvas {
     -moz-transform: scaleX(-1);
     -o-transform: scaleX(-1);
