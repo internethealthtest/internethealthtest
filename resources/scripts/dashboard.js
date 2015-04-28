@@ -72,7 +72,13 @@ InternetHealthTest.prototype.setupInterface = function () {
   this.domObjects.performance_meter.percentageLoader({value: 'Upload'});
   this.domObjects.performance_meter.find('div div').text('Start');
   this.domObjects.performance_meter.addClass('test_control_enabled');
-  this.domObjects.intro_overlay.popup('open');
+
+  $.merge(this.historicalData, this.getlocalStorage());
+  this.populateHistoricalData(this.historicalData);
+  
+  if (this.historicalData.length === 0) {
+    this.domObjects.intro_overlay.popup('open');
+  }
 
   this.domObjects.start_button.click(function () {
     that.domObjects.intro_overlay.popup('close');
@@ -90,8 +96,6 @@ InternetHealthTest.prototype.setupInterface = function () {
     }
   });
   
-  $.merge(this.historicalData, this.getlocalStorage());
-  this.populateHistoricalData(this.historicalData);
 };
 
 InternetHealthTest.prototype.getlocalStorage = function () {
@@ -263,12 +267,12 @@ InternetHealthTest.prototype.onfinish = function (passedResults) {
 InternetHealthTest.prototype.onerror = function () { return false; };
 
 InternetHealthTest.prototype.notifyTestStart = function (currentServer) {
-  this.changeRowIcon(currentServer.id, 'recycle');
+  this.changeRowIcon(currentServer.id, 'recycle', 'testing');
   this.changeRowHighlight(currentServer.id, true);
 };
 
 InternetHealthTest.prototype.notifyTestCompletion = function (siteId, passedResults) {
-  this.changeRowIcon(siteId, 'plus');
+  this.changeRowIcon(siteId, 'plus', 'complete');
   this.changeRowHighlight(siteId, false);
   this.changeRowResults(siteId, passedResults);
   this.populateResultData(siteId, passedResults);
@@ -372,23 +376,28 @@ InternetHealthTest.prototype.notifyStateChange = function (newState, passedResul
     this.setProgressMeterCompleted();
   } else if (newState === 'running_s2c') {
     this.setProgressMeterReversed();
-    this.changeRowIcon(passedResults.metadata.id, 'arrow-d');
+    this.changeRowIcon(passedResults.metadata.id, 'arrow-d', 'testing');
   } else if (newState === 'running_c2s') {
-    this.changeRowIcon(passedResults.metadata.id, 'arrow-u');
+    this.changeRowIcon(passedResults.metadata.id, 'arrow-u', 'testing');
   }
 };
 
-InternetHealthTest.prototype.changeRowIcon = function (rowId, newIcon) {
+InternetHealthTest.prototype.changeRowIcon = function (rowId, newIcon, classIcon) {
   var rowIdClass = '.' + rowId,
     dataIcon = this.domObjects.result_list.find(rowIdClass).attr('data-collapsed-icon'),
     oldIconClass = 'ui-icon-' + dataIcon,
     newIconClass = 'ui-icon-' + newIcon;
-  this.domObjects.result_list.find(rowIdClass)
-      .attr('data-collapsed-icon', newIcon)
+  var thisRow = this.domObjects.result_list.find(rowIdClass);
+  
+  thisRow.attr('data-collapsed-icon', newIcon)
       .find('.ui-btn')
         .removeClass('ui-icon-clock')
         .removeClass(oldIconClass)
         .addClass(newIconClass);
+  if (classIcon !== undefined) {
+    thisRow.removeClass('testing').removeClass('complete');
+    thisRow.addClass(classIcon);
+  }
   this.domObjects.result_list.collapsibleset('refresh');
 };
 

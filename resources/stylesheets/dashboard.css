@@ -55,6 +55,7 @@
 .canvas .content_panel .container__performance_meter .performance_meter div {
     margin-right: 0px;
     margin: 0 auto;
+    vertical-align: middle;
 }
 
 .canvas .content_panel .container__performance_meter .performance_meter .test_control_enabled {
@@ -68,12 +69,47 @@
 .canvas .content_panel .container__dashboard {
 
 }
+.ui-content.content_panel {
+    min-height: 317px;
+}
+
+.canvas .ui-content .ui-listview {
+    margin: inherit;
+    margin-top: 2em;
+}
+
+.canvas .ui-collapsible-set .ui-listview {
+    margin: -1em;
+}
+
+.canvas .dashboard__result_list .ui-collapsible-set {
+    margin-top: 0px;
+}
+.canvas .provider.testing .ui-btn-icon-left:after,
+    .canvas .provider.testing .ui-btn-icon-right:after,
+    .canvas .provider.testing .ui-btn-icon-top:after,
+    .canvas .provider.testing .ui-btn-icon-bottom:after,
+    .canvas .provider.testing .ui-btn-icon-notext:after {
+    background-color: rgb(255, 210, 0);
+}
+.canvas .provider.complete .ui-btn-icon-left:after,
+    .canvas .provider.complete .ui-btn-icon-right:after,
+    .canvas .provider.complete .ui-btn-icon-top:after,
+    .canvas .provider.complete .ui-btn-icon-bottom:after,
+    .canvas .provider.complete .ui-btn-icon-notext:after {
+    background-color: rgb(133, 232, 118);
+}
 
 .canvas .ui-grid-a .ui-block-a {
     text-align: center;
 }
+
+.ui-mobile-viewport.ui-overlay-a {
+    font-size: 0.9em;
+}
 .canvas .ui-grid-a .ui-block-a .intro_overlay_icon {
-    height: 20em;
+    height: 16em;
+    margin-top: 3em;
 }
 
 .canvas .select__server_location {
@@ -82,7 +118,6 @@
   font-size: 16px;
   font-weight: bold;
   text-align: right;
-  margin-right: 20px;
   text-decoration: none;
   text-shadow: rgb(243, 243, 243) 0px 1px 0px;
 }

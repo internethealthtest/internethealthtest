@@ -16,18 +16,19 @@
         <div data-role="page" class="canvas">
             <div data-role="header" data-icon="internethealth" data-theme="a">
                 <h1>
-                    <img src="resources/images/network.svg" class="header-icon">
-                    Internet Health Test
+					<img src="resources/images/network.svg" class="header-icon" />
+					Internet Health Test
                 </h1>
             </div>
             <div role="main" class="ui-content content_panel ui-grid-a">
 				<div data-role="popup" data-history="false" data-overlay-theme="a" class="ui-content intro_overlay">
 					<div class="ui-grid-a">
-						<div class="ui-block-a"><img src="resources/images/network.svg" class="intro_overlay_icon"/>
+						<div class="ui-block-a">
+							<img src="resources/images/network.svg" class="intro_overlay_icon"/>
 						</div>
 						<div class="ui-block-b">
 							<h3>Welcome to the Internet Health Test!</h3>
-							The Health Test perform simple tests to a diverse set of servers located near you compare how your broadband connection varies to different parts of the Internet. These measurements are short speed tests and do not collect personal information from your browser.
+								The Health Test runs a few short speed tests to some measurement servers located near you to compare how your broadband connection varies to different parts of the Internet. These tests shouldn't take too long and do not collect personal information from your browser.
 							<br /><br />
 							<input type="button" value="Start Test" class="dashboard__start_button">
 							<br />
@@ -48,7 +49,8 @@
                         </div>
                     </div>
 					<div class="dashboard__result_list">
-						<div data-role="collapsible-set" data-theme="a" data-content-theme="a"></div>
+					<ul data-role="listview" class="list-view-header"><li data-role="list-divider" class="ui-listview-header">Results</li></ul>
+						<div data-role="collapsible-set" data-theme="e" data-content-theme="a"></div>
 					</div>
                 </div>
             </div>
