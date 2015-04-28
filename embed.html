@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script>
+$(document).ready(function () {
+    var iframeExample = $('#iframe_example').html();
+    var iframeSourceDisplay = $('#iframe_source_display');
+    
+    iframeSourceDisplay.text(iframeExample);
+});
+</script>
+<style>
+div, pre {
+  width: 600px;
+  margin: 0 auto;
+}
+#iframe_source_display {
+    
+}
+</style>
+</head>
+<body>
+<div><h1>Internet Health Test</h1></div>
+<div><h2>Partner Instructions</h2></div>
+<div><h3>Embed Code</h3></div>
+<div id="iframe_source_display"></div>
+<div><h3>Result</h3></div>
+<div id="iframe_example">
+<iframe src="http://internethealthtest.org" name="internethealthtest" width="600" height="400" style="border: none; margin: 0px"></iframe>
+</div>
+</body>
+</html>
