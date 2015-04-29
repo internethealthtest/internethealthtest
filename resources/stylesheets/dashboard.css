@@ -85,6 +85,12 @@
 .canvas .dashboard__result_list .ui-collapsible-set {
     margin-top: 0px;
 }
+.canvas .dashboard__result_list .ui-li-count.result_label {
+    background: none;
+    color: inherit;
+    border: none;
+    font-weight: normal;
+}
 .canvas .provider.testing .ui-btn-icon-left:after,
     .canvas .provider.testing .ui-btn-icon-right:after,
     .canvas .provider.testing .ui-btn-icon-top:after,
