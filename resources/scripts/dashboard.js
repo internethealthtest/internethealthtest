@@ -62,6 +62,7 @@ function InternetHealthTest() {
     top: '50%', // Top position relative to parent
     left: '120px' // Left position relative to parent
   };
+  this.isStorageSupported = this.isLocalStorageNameSupported();
   this.setupInterface();
 }
 
@@ -79,10 +80,6 @@ InternetHealthTest.prototype.setupInterface = function () {
 
   $.merge(this.historicalData, this.getlocalStorage());
   this.populateHistoricalData(this.historicalData);
-  
-  if (this.historicalData.length === 0) {
-    this.domObjects.intro_overlay.popup('open');
-  }
 
   this.domObjects.start_button.click(function () {
     that.domObjects.intro_overlay.popup('close');
@@ -100,8 +97,27 @@ InternetHealthTest.prototype.setupInterface = function () {
     }
   });
   this.domObjects.about_button.click(function () {
-      that.domObjects.intro_overlay.popup('open');
+    that.domObjects.intro_overlay.popup('open');
   });
+  if (that.historicalData.length === 0) {
+    window.setTimeout( function () {
+
+    that.domObjects.intro_overlay.popup('open');
+  }, 1000);
+  }
+};
+
+InternetHealthTest.prototype.isLocalStorageNameSupported = function () {
+  var testKey = 'historicalDataTestKey';
+
+  try {
+    window.sessionStorage.setItem(testKey, '1');
+    window.sessionStorage.removeItem(testKey);
+    return true;
+  }
+  catch (error) {
+    return false;
+  }
 };
 
 InternetHealthTest.prototype.getlocalStorage = function () {
@@ -265,7 +281,11 @@ InternetHealthTest.prototype.onfinish = function (passedResults) {
 
   this.resultList.push(passedResults);
   this.historicalData.push(passedResults);
-  this.setlocalStorage(this.historicalData);
+
+  if (this.isStorageSupported === true) {
+    this.setlocalStorage(this.historicalData);
+  }
+
   this.notifyTestCompletion(passedResults.siteId, passedResults);
 
   if (this.serverQueue.length > 0) {
@@ -463,3 +483,5 @@ $(document).ready(function () {
   var dashboard = new InternetHealthTest();
   dashboard.findServers();
 });
+
+
