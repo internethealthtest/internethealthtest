@@ -128,7 +128,7 @@
   text-shadow: rgb(243, 243, 243) 0px 1px 0px;
 }
 .canvas .select__server_location {
-    color: #333;
+    color: #777;
 }
 
 .canvas .dashboard__thank_you {
@@ -136,6 +136,12 @@
 }
 .canvas .dashboard__thank_you input {
     background: rgb(133, 232, 118);
+}
+
+.canvas .result_label .result_explanation {
+    margin: 0;
+    width: 1em;
+    height: 1em;
 }
 
 .canvas .performance_meter.reversed canvas {
