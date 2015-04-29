@@ -112,7 +112,7 @@
     margin-top: 3em;
 }
 
-.canvas .select__server_location {
+.canvas .label__server_location {
   color: rgb(175, 175, 175);
   font-family: sans-serif;
   font-size: 16px;
@@ -120,6 +120,9 @@
   text-align: right;
   text-decoration: none;
   text-shadow: rgb(243, 243, 243) 0px 1px 0px;
+}
+.canvas .select__server_location {
+    color: #333;
 }
 
 .canvas .dashboard__thank_you {
@@ -136,6 +139,21 @@
     transform: scaleX(-1);
     filter: FlipH;
     -ms-filter: "FlipH";
+}
+.canvas .performance_meter .percentage_text {
+    top: 96px;
+    font: 64px BebasNeueRegular;
+    text-shadow: 0px 1px 1px #888;
+}
+.canvas .performance_meter .percentage_text.smallertext {
+    top: 110px;
+    font: 40px BebasNeueRegular;
+    text-shadow: 0px 1px 1px #888;
+}
+.canvas .performance_meter .percentage_text.biggertext {
+    top: 90px;
+    font: 80px BebasNeueRegular;
+    text-shadow: 0px 1px 1px #888;
 }
 
 .canvas .ui-listview .ui-highlighted, .canvas .ui-listview .ui-highlighted a {

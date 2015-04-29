@@ -88,7 +88,7 @@ InternetHealthTest.prototype.setupInterface = function () {
     }
     that.runServerQueue();
   });
-  this.domObjects.performance_meter.click(function () {
+  this.domObjects.performance_meter.find('div').first().click(function () {
     if (that.domObjects.performance_meter.hasClass('test_control_enabled') === true) {
       if (that.resultList.length > 0) {
         that.resetDashboard();
@@ -398,10 +398,10 @@ InternetHealthTest.prototype.notifyStateChange = function (newState, passedResul
   this.resetProgressMeter();
   
   if (newState === 'preparing_s2c' || newState === 'preparing_c2s') {
-    this.domObjects.performance_meter.find('div div').first().css('font', '40px BebasNeueRegular')
+    this.domObjects.performance_meter.find('.percentage_text').addClass('smallertext');
     this.domObjects.performance_meter.find('div div').text('Preparing');
   } else if (newState === 'preparing_meta' || newState === 'running_meta') {
-    this.domObjects.performance_meter.find('div div').first().css('font', '40px BebasNeueRegular')
+    this.domObjects.performance_meter.find('.percentage_text').addClass('smallertext');
     this.domObjects.performance_meter.find('div div').text('Submitting');
   }
 
@@ -410,8 +410,10 @@ InternetHealthTest.prototype.notifyStateChange = function (newState, passedResul
     this.setProgressMeterCompleted();
   } else if (newState === 'running_s2c') {
     this.setProgressMeterReversed();
+    this.domObjects.performance_meter.find('.percentage_text').addClass('biggertext');
     this.changeRowIcon(passedResults.metadata.id, 'arrow-d', 'testing');
   } else if (newState === 'running_c2s') {
+    this.domObjects.performance_meter.find('.percentage_text').addClass('biggertext');
     this.changeRowIcon(passedResults.metadata.id, 'arrow-u', 'testing');
   }
 };
@@ -471,7 +473,9 @@ InternetHealthTest.prototype.setProgressMeterCompleted = function () {
 InternetHealthTest.prototype.resetProgressMeter = function () {
   this.domObjects.performance_meter.removeClass('reversed');
   this.domObjects.performance_meter.find('div div').text('');
-  this.domObjects.performance_meter.find('div div').first().css('font', '64px BebasNeueRegular')
+  this.domObjects.performance_meter.find('.percentage_text')
+    .removeClass('biggertext')
+    .removeClass('smallertext');
 };
 
 InternetHealthTest.prototype.setProgressMeterReversed = function () {

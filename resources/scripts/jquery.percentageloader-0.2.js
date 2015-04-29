@@ -76,6 +76,7 @@ see the file license.txt that was included with the plugin bundle.
         percentageText.style.height = '50px';
         percentageText.style.left = 0;
         percentageText.style.position = 'absolute';
+        percentageText.className = "percentage_text"
 
         valueText = document.createElement('div');
         valueText.style.width = (settings.width - 2).toString() + 'px';
@@ -269,10 +270,7 @@ see the file license.txt that was included with the plugin bundle.
                 /* Calculate the size of the font based on the canvas size */
                 fontSize = cX / 2;
 
-                percentageText.style.top = ((settings.height / 2) - (fontSize / 2)).toString() + 'px';
                 percentageText.style.color = '#80a9c8';
-                percentageText.style.font = fontSize.toString() + 'px BebasNeueRegular';
-                percentageText.style.textShadow = '0 1px 1px #FFFFFF';
 
                 /* Calculate the text for the given percentage */
                 string = (progress * 100.0).toFixed(0) + '%';
