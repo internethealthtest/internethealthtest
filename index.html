@@ -12,6 +12,14 @@
         <script src="resources/scripts/dashboard.js"></script>
 	</head>
 	<body>
+		<div id="fb-root"></div>
+		<script>(function(d, s, id) {
+		  var js, fjs = d.getElementsByTagName(s)[0];
+		  if (d.getElementById(id)) return;
+		  js = d.createElement(s); js.id = id;
+		  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.3&appId=153360608084341";
+		  fjs.parentNode.insertBefore(js, fjs);
+		}(document, 'script', 'facebook-jssdk'));</script>
         <div data-role="page" class="canvas">
             <div data-role="header" data-icon="internethealth" data-theme="a">
                 <h1>
@@ -19,6 +27,19 @@
 					Internet Health Test
                 </h1>
 				<a class="intro_overlay_about" data-role="button" data-mini="true" class="ui-btn-left"  data-theme="a">About</a>
+				<h4 class="ui-btn-right">
+					<a href="https://twitter.com/share" class="twitter-share-button"
+					  data-dnt="true"
+					  data-size="large"
+					  data-count="none"
+					  data-via="twitterdev">
+					</a>
+					<script>
+					window.twttr=(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return;js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);t._e=[];t.ready=function(f){t._e.push(f);};return t;}(document,"script","twitter-wjs"));
+					</script>
+					<div class="fb-share-button" data-href="http://internethealthtest.org" data-layout="button"></div>
+					<a href="//www.reddit.com/submit" onclick="window.location = '//www.reddit.com/submit?url=' + encodeURIComponent(window.location); return false"> <img src="//www.redditstatic.com/spreddit1.gif" alt="submit to reddit" border="0" /> </a>
+				</h4>
             </div>
             <div role="main" class="ui-content content_panel ui-grid-a">
 				<div data-role="popup" data-history="false" class="supported_browser_dialogue" class="ui-content" data-dismissible="false">
