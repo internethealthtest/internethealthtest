@@ -125,6 +125,10 @@
 	background-image: url("/resources/images/twitter.png");
 }
 
+.ui-icon-wordpress:after {
+	background-image: url("/resources/images/wordpress.png");
+}
+
 .canvas .ui-grid-a .ui-block-a {
     text-align: center;
 }
