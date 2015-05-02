@@ -212,7 +212,7 @@ InternetHealthTest.prototype.parseServerList = function (responseText, metro) {
 
 InternetHealthTest.prototype.parseSiteRecord = function (siteRecord) {
   return {
-    address: 'ndt.iupui.mlab1.nuq0t.measurement-lab.org',
+    address: 'ndt.iupui.mlab1.' + siteRecord.site + '.measurement-lab.org',
     port: Number('3001'),
     transit: siteRecord.transit,
     path: '/ndt_protocol',
@@ -222,7 +222,7 @@ InternetHealthTest.prototype.parseSiteRecord = function (siteRecord) {
 };
 InternetHealthTest.prototype.constructSiteRecord = function (mlabNsAnwer) {
   return {
-    address: 'ndt.iupui.mlab1.nuq0t.measurement-lab.org',
+    address: 'ndt.iupui.mlab1.' + siteRecord.site + '.measurement-lab.org',
     port: Number('3001'),
     transit: mlabNsAnwer.city,
     path: '/ndt_protocol',
