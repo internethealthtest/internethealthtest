@@ -28,10 +28,10 @@
 
 }
 
-.header-icon {
-    height: 1em;
+.canvas .header-icon {
+    height: 1.1em;
 }
-.ui-collapsible-set .ui-li-count {
+.canvas .ui-collapsible-set .ui-li-count {
   margin-right: 3em;
 }
 
