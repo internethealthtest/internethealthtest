@@ -37,6 +37,7 @@ function InternetHealthTest() {
   this.domObjects = {
     'intro_overlay': this.canvas.find('.intro_overlay'),
     'about_overlay': this.canvas.find('.about_overlay'),
+    'embed_overlay': this.canvas.find('.embed_overlay'),
     'performance_meter': this.canvas.find('.performance_meter'),
     'performance_meter_objects': this.canvas.find('.performance_meter div'),
     'result_list': this.canvas.find('.dashboard__result_list .ui-collapsible-set'),
@@ -44,6 +45,7 @@ function InternetHealthTest() {
     'server_list': this.canvas.find('.select__server_location'),
     'historical_information': this.canvas.find('.historical_information'),
     'about_button': this.canvas.find('.intro_overlay_about'),
+    'embed_button': this.canvas.find('.intro_overlay_embed'),
     'supported_browser_dialogue': this.canvas.find('.supported_browser_dialogue'),
     'completion_notice': this.canvas.find('.dashboard__thank_you')
   };
@@ -71,6 +73,7 @@ InternetHealthTest.prototype.setupInterface = function () {
   var that = this;
   this.domObjects.intro_overlay.popup();
   this.domObjects.about_overlay.popup();
+  this.domObjects.embed_overlay.popup();
   this.domObjects.start_button.button();
   this.domObjects.supported_browser_dialogue.popup();
   
@@ -85,6 +88,7 @@ InternetHealthTest.prototype.setupInterface = function () {
 
   this.domObjects.start_button.click(function () {
     that.domObjects.intro_overlay.popup('close');
+    that.domObjects.completion_notice.hide();
     if (that.resultList.length > 0) {
       that.resetDashboard();
     }
@@ -100,6 +104,9 @@ InternetHealthTest.prototype.setupInterface = function () {
   });
   this.domObjects.about_button.click(function () {
     that.domObjects.about_overlay.popup('open');
+  });
+  this.domObjects.embed_button.click(function () {
+    that.domObjects.embed_overlay.popup('open');
   });
   if (that.historicalData.length === 0) {
     window.setTimeout( function () {
