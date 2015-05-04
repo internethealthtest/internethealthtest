@@ -36,6 +36,7 @@ function InternetHealthTest() {
   };
   this.domObjects = {
     'intro_overlay': this.canvas.find('.intro_overlay'),
+    'about_overlay': this.canvas.find('.about_overlay'),
     'performance_meter': this.canvas.find('.performance_meter'),
     'performance_meter_objects': this.canvas.find('.performance_meter div'),
     'result_list': this.canvas.find('.dashboard__result_list .ui-collapsible-set'),
@@ -69,6 +70,7 @@ function InternetHealthTest() {
 InternetHealthTest.prototype.setupInterface = function () {
   var that = this;
   this.domObjects.intro_overlay.popup();
+  this.domObjects.about_overlay.popup();
   this.domObjects.start_button.button();
   this.domObjects.supported_browser_dialogue.popup();
   
@@ -97,7 +99,7 @@ InternetHealthTest.prototype.setupInterface = function () {
     }
   });
   this.domObjects.about_button.click(function () {
-    that.domObjects.intro_overlay.popup('open');
+    that.domObjects.about_overlay.popup('open');
   });
   if (that.historicalData.length === 0) {
     window.setTimeout( function () {
@@ -144,6 +146,12 @@ InternetHealthTest.prototype.populateResultData = function (siteId, passedResult
   var testResultItem, testResultValueString;
 
   this.domObjects.result_list.find(siteIdClass).removeClass('ui-disabled');
+  testResultItem = $('<li>').text("Transit");
+  testResultItem.append($('<span>')
+    .addClass('ui-li-count')
+    .text(passedResults.metadata.transit));
+  thisListView.append(testResultItem);
+
   for (var testResultValue in this.RESULTS_TO_DISPLAY) {
     if (this.RESULTS_TO_DISPLAY.hasOwnProperty(testResultValue)) {
       testResultValueString = this.formatMeasurementResult(testResultValue,
@@ -210,9 +218,14 @@ InternetHealthTest.prototype.parseServerList = function (responseText, metro) {
   return this.serverList;
 };
 
+InternetHealthTest.prototype.findServerAtSite = function (siteName) {
+  var siteNumber = 'mlab' + (Math.floor(Math.random() * 3) + 1);
+  return 'ndt.iupui.' + siteNumber +'.' + siteName + '.measurement-lab.org';
+};
+
 InternetHealthTest.prototype.parseSiteRecord = function (siteRecord) {
   return {
-    address: 'ndt.iupui.mlab1.' + siteRecord.site + '.measurement-lab.org',
+    address: this.findServerAtSite(siteRecord.site),
     port: Number('3001'),
     transit: siteRecord.transit,
     path: '/ndt_protocol',
@@ -220,14 +233,15 @@ InternetHealthTest.prototype.parseSiteRecord = function (siteRecord) {
     id: (siteRecord.site + '_' + siteRecord.transit).replace(' ', '_')
   };
 };
-InternetHealthTest.prototype.constructSiteRecord = function (mlabNsAnwer) {
+
+InternetHealthTest.prototype.constructSiteRecord = function (mlabNsAnswer) {
   return {
-    address: 'ndt.iupui.mlab1.' + siteRecord.site + '.measurement-lab.org',
+    address: this.findServerAtSite(mlabNsAnswer.site),
     port: Number('3001'),
-    transit: mlabNsAnwer.city,
+    transit: mlabNsAnswer.city,
     path: '/ndt_protocol',
-    site: mlabNsAnwer.site,
-    id: (mlabNsAnwer.site + '_' + mlabNsAnwer.transit).replace(' ', '_')
+    site: mlabNsAnswer.site,
+    id: (mlabNsAnswer.site + '_' + mlabNsAnswer.transit).replace(' ', '_')
   };
 };
 
@@ -357,7 +371,8 @@ InternetHealthTest.prototype.notifyTestProgress = function (currentState,
 InternetHealthTest.prototype.notifyServerListUpdate = function (serverList) {
   var that = this;
   var temporaryRow;
-
+  var i = 1;
+  
   this.domObjects.server_list.text(this.mlabNsAnwer.city.replace('_', ' '));
 
   serverList.forEach(function (siteRecord) {
@@ -370,11 +385,12 @@ InternetHealthTest.prototype.notifyServerListUpdate = function (serverList) {
       .addClass('ui-disabled')
       .addClass('ui-icon-clock')
       .addClass(siteRecord.id);
-    temporaryRow.append($("<h3>").text(siteRecord.transit));
+    temporaryRow.append($("<h3>").text("Connection " + i));
     temporaryRow.append($("<ul>")
       .attr('data-role-icon', 'listview')
       .attr('data-theme', 'a'));
     that.domObjects.result_list.append(temporaryRow);
+    i += 1;
   });
   this.domObjects.result_list.collapsibleset('refresh');
   this.domObjects.result_list.find('a.ui-icon-plus').removeClass('ui-icon-plus').addClass('ui-icon-clock')
