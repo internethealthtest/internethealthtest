@@ -192,6 +192,23 @@ InternetHealthTest.prototype.findServers = function () {
   mlabNsRequest.send();
 };
 
+InternetHealthTest.prototype.findAllServers = function () {
+  var mlabNsRequest = new XMLHttpRequest(),
+    mlabNsUrl = 'http://mlab-ns.appspot.com/ndt?format=json&policy=all',
+    that = this;
+
+  mlabNsRequest.onreadystatechange = function () {
+    if (mlabNsRequest.readyState === 4) {
+      if (mlabNsRequest.status === 200) {
+        that.mlabNsAnwer = JSON.parse(mlabNsRequest.responseText);
+        //that.findMoreServers(that.mlabNsAnwer);
+      }
+    }
+  };
+  mlabNsRequest.open("GET", mlabNsUrl, true);
+  mlabNsRequest.send();
+};
+
 InternetHealthTest.prototype.findMoreServers = function (mlabNsAnwer) {
   var mlabSiteListRequest = new XMLHttpRequest();
   var mlabSiteListURL = "resources/datasets/site_list.json";
