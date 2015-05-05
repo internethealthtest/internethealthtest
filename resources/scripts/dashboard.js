@@ -8,7 +8,7 @@ function InternetHealthTest() {
 
   this.serverQueue = [];
   this.serverList = [];
-  this.resultList = [];
+  this.resultList = {};
   this.siteMap = {};
   this.isRunning = false;
   this.canvas = $('.canvas');
@@ -36,7 +36,7 @@ function InternetHealthTest() {
     's2cRate': 'Download',
     'c2sRate': 'Upload',
     'MinRTT': 'Latency',
-    'packetRetransmissions': 'Packet Retransmissions'
+    'packetRetransmissions': 'Retransmissions'
   };
   this.domObjects = {
     'intro_overlay': this.canvas.find('.intro_overlay'),
@@ -44,14 +44,17 @@ function InternetHealthTest() {
     'embed_overlay': this.canvas.find('.embed_overlay'),
     'performance_meter': this.canvas.find('.performance_meter'),
     'performance_meter_objects': this.canvas.find('.performance_meter div'),
-    'result_list': this.canvas.find('.dashboard__result_list .ui-collapsible-set'),
+    'result_list': this.canvas.find('.dashboard__result_list .ui-listview'),
+    'result_list_item': this.canvas.find('.dashboard__result_list .ui-listview li'),
     'start_button': this.canvas.find('.dashboard__start_button'),
     'server_list': this.canvas.find('.select__server_location'),
     'historical_information': this.canvas.find('.historical_information'),
     'about_button': this.canvas.find('.intro_overlay_about'),
     'embed_button': this.canvas.find('.intro_overlay_embed'),
     'supported_browser_dialogue': this.canvas.find('.supported_browser_dialogue'),
-    'completion_notice': this.canvas.find('.dashboard__thank_you')
+    'completion_notice': this.canvas.find('.dashboard__thank_you'),
+    'measurement_panel': this.canvas.find('.panel__measurement_results'),
+    'measurement_panel_list': this.canvas.find('.panel__measurement_results  .ui-listview')
   };
   this.spinnerOpts = {
     lines: 13, // The number of lines to draw
@@ -112,6 +115,7 @@ InternetHealthTest.prototype.setupInterface = function () {
       that.runServerQueue();
     }
   });
+
   this.domObjects.about_button.click(function () {
     that.domObjects.about_overlay.popup('open');
   });
@@ -157,33 +161,6 @@ InternetHealthTest.prototype.populateHistoricalData = function (historicalData) 
   this.domObjects.historical_information.text(historicalDataSize);
 };
 
-InternetHealthTest.prototype.populateResultData = function (siteId, passedResults) {
-  var siteIdClass = '.' + siteId;
-  var thisListView = this.domObjects.result_list.find(siteIdClass).find('ul');
-  var testResultItem, testResultValueString, testResultValue;
-
-  this.domObjects.result_list.find(siteIdClass).removeClass('ui-disabled');
-  testResultItem = $('<li>').text("Transit");
-  testResultItem.append($('<span>')
-    .addClass('ui-li-count')
-    .text(passedResults.metadata.transit));
-  thisListView.append(testResultItem);
-
-  for (testResultValue in this.RESULTS_TO_DISPLAY) {
-    if (this.RESULTS_TO_DISPLAY.hasOwnProperty(testResultValue)) {
-      testResultValueString = this.formatMeasurementResult(testResultValue,
-        passedResults[testResultValue]);
-      testResultItem = $('<li>').text(this.RESULTS_TO_DISPLAY[testResultValue]);
-      testResultItem.append($('<span>')
-        .addClass('ui-li-count')
-        .text(testResultValueString));
-      thisListView.append(testResultItem);
-    }
-  }
-  thisListView.listview().listview('refresh');
-  this.domObjects.result_list.collapsibleset('refresh');
-};
-
 InternetHealthTest.prototype.findLocalServers = function (allServers) {
   var mlabNsRequest = new XMLHttpRequest(),
     mlabNsUrl = 'http://mlab-ns.appspot.com/ndt?format=json',
@@ -218,6 +195,30 @@ InternetHealthTest.prototype.findAllServers = function () {
   mlabNsRequest.open("GET", mlabNsUrl, true);
   mlabNsRequest.send();
 };
+
+InternetHealthTest.prototype.populatePanelData = function (siteId) {
+  var testResultItem, testResultValueString, testResultValue;
+
+  this.domObjects.measurement_panel_list.find('li').remove();
+  testResultItem = $('<li>').text("Transit");
+  testResultItem.append($('<span>')
+    .addClass('ui-li-count')
+    .text(this.resultList[siteId].metadata.transit));
+  this.domObjects.measurement_panel_list.append(testResultItem);
+
+  for (testResultValue in this.RESULTS_TO_DISPLAY) {
+    if (this.RESULTS_TO_DISPLAY.hasOwnProperty(testResultValue)) {
+      testResultValueString = this.formatMeasurementResult(testResultValue,
+        this.resultList[siteId][testResultValue]);
+      testResultItem = $('<li>').text(this.RESULTS_TO_DISPLAY[testResultValue]);
+      testResultItem.append($('<span>')
+        .addClass('ui-li-count')
+        .text(testResultValueString));
+      this.domObjects.measurement_panel_list.append(testResultItem);
+    }
+  }
+  this.domObjects.measurement_panel_list.listview().listview('refresh');
+}
 
 InternetHealthTest.prototype.findMoreServers = function (allServers, localServer) {
   var mlabSiteListRequest = new XMLHttpRequest();
@@ -357,7 +358,7 @@ InternetHealthTest.prototype.onfinish = function (passedResults) {
 
   passedResults.packetRetransmissions = Number(passedResults['PktsRetrans']) /
     Number(passedResults['PktsOut']);
-  this.resultList.push(passedResults);
+  this.resultList[passedResults.siteId] = passedResults;
   this.historicalData.push(passedResults);
 
   if (this.isStorageSupported === true) {
@@ -383,10 +384,12 @@ InternetHealthTest.prototype.notifyTestStart = function (currentServer) {
 };
 
 InternetHealthTest.prototype.notifyTestCompletion = function (siteId, passedResults) {
+  var siteIdClass = '.' + siteId;
+  this.domObjects.result_list.find(siteIdClass).removeClass('ui-disabled');
+  this.domObjects.result_list.listview('refresh');
   this.changeRowIcon(siteId, 'plus', 'complete');
   this.changeRowHighlight(siteId, false);
   this.changeRowResults(siteId, passedResults);
-  this.populateResultData(siteId, passedResults);
   this.populateHistoricalData(this.historicalData);
 };
 
@@ -397,12 +400,13 @@ InternetHealthTest.prototype.notifyServerQueueStart = function () {
 
 InternetHealthTest.prototype.notifyServerQueueCompletion = function () {
   this.domObjects.performance_meter.addClass('test_control_enabled');
-  this.domObjects.performance_meter.percentageLoader({value: 'Complete'});
   this.domObjects.performance_meter.addClass('test_control_enabled');
   this.domObjects.start_button.val('Test Again').button('refresh');
   this.domObjects.start_button.button('enable');
   this.domObjects.completion_notice.show();
   this.notifyResultListUpdate();
+  this.domObjects.performance_meter.percentageLoader({value: 'Complete'});
+  this.setProgressMeterCompleted();
 };
 
 InternetHealthTest.prototype.notifyTestProgress = function (currentState,
@@ -436,34 +440,37 @@ InternetHealthTest.prototype.notifyServerListUpdate = function (serverList) {
   var that = this;
   var temporaryRow;
   var i = 1;
+  var onclickTransit, onclickSiteId;
   
   this.domObjects.server_list.text(this.mlabNsAnwer.city.replace('_', ' '));
 
   serverList.forEach(function (siteRecord) {
-    temporaryRow = $("<div>")
-      .attr('data-collapsed-icon', 'plus')
-      .attr('data-expanded-icon', 'minus')
+    temporaryRow = $("<li>")
       .attr('data-iconpos', 'right')
-      .attr('data-role', 'collapsible')
-      .addClass('provider')
+      .attr('data-icon', 'clock')
+      .data('site_id', siteRecord.id)
       .addClass('ui-disabled')
-      .addClass('ui-icon-clock')
+      .addClass('provider')
       .addClass(siteRecord.id);
-    temporaryRow.append($("<h3>").text("Connection " + i));
-    temporaryRow.append($("<ul>")
-      .attr('data-role-icon', 'listview')
-      .attr('data-theme', 'a'));
+    temporaryRow.append($("<a>")
+      .text(siteRecord.transit)); //"Connection " + i
+    temporaryRow.click(function () {
+      onclickSiteId = $(this).data('site_id');
+      that.populatePanelData(onclickSiteId);
+      that.domObjects.measurement_panel.trigger("updatelayout");
+      that.domObjects.measurement_panel.panel("open")
+    });
     that.domObjects.result_list.append(temporaryRow);
     i += 1;
   });
-  this.domObjects.result_list.collapsibleset('refresh');
+  this.domObjects.result_list.listview('refresh');
   this.domObjects.result_list.find('a.ui-icon-plus').removeClass('ui-icon-plus').addClass('ui-icon-clock')
 
 };
 
 InternetHealthTest.prototype.resetDashboard = function () {
   this.serverQueue = this.serverList;
-  this.resultList = [];
+  this.resultList = {};
   this.domObjects.result_list.find('.provider').remove();
   this.notifyServerListUpdate(this.serverQueue);
 };
@@ -514,7 +521,7 @@ InternetHealthTest.prototype.changeRowIcon = function (rowId, newIcon, classIcon
     thisRow.removeClass('testing').removeClass('complete');
     thisRow.addClass(classIcon);
   }
-  this.domObjects.result_list.collapsibleset('refresh');
+  this.domObjects.result_list.listview('refresh');
 };
 
 InternetHealthTest.prototype.changeRowHighlight = function (rowId, highlighted) {

@@ -31,12 +31,23 @@
 	</head>
 	<body>
         <div data-role="page" class="canvas">
+			<div data-role="panel" data-position="right" data-position-fixed="true" data-display="overlay" data-theme="a" class="panel__measurement_results">
+				<div class="ui-corner-all custom-corners">
+					<div class="ui-bar ui-bar-a">Measurement Data</div>
+					<div class="ui-body ui-body-a">
+						<ul data-role="listview" data-inset="true"></ul>
+						<button data-rel="close">Hide</button>
+					</div>
+				</div>
+			</div>
             <div data-role="header" data-icon="internethealth" data-theme="a">
                 <h1>
 					<img src="/resources/images/favicon.png" class="header-icon" />
 					Internet Health Test
                 </h1>
-				<a class="intro_overlay_about" data-role="button" data-mini="true" class="ui-btn-left"  data-theme="a">What Is This?</a>
+				<div data-type="horizontal" class="ui-btn-left">
+					<a class="intro_overlay_about" data-role="button" data-mini="true" data-theme="a">What Is This?</a>
+				</div>
 				<div data-type="horizontal" class="ui-btn-right">
 					<a href="#" class="ui-btn ui-icon-twitter ui-btn-icon-notext ui-corner-all" onclick="window.open('https://twitter.com/home?status=Blah%20blah%20blah%20internethealthtest.org');" data-inline="true">Twitter</a>
 					<a href="#" class="ui-btn ui-icon-facebook ui-btn-icon-notext ui-corner-all" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=internethealthtest.org');" data-inline="true">Facebook</a>
@@ -89,31 +100,27 @@
 				<div data-role="popup" id="result_explanation" class="ui-content" data-theme="a" style="max-width:350px;">
 					Download speed is the maximum rate that your computer could receive data from the server. Each row can be expanded to display more metrics from the test.
 				</div>
-                <div class="container__performance_meter ui-block-a">
-                    <div class="performance_meter"></div>
+                <div class="container__performance_meter ui-block-a ui-corner-all custom-corners">
+					<div class="ui-body ui-body-a">
+						<div class="performance_meter"></div>
+					</div>
+					<div class="ui-bar ui-bar-a">
+						<h3 class="label__server_location">Testing to: <span class="select__server_location"></span></h3>
+					</div>
                 </div>
                 <div class="container__dashboard ui-block-b">
-                    <div class="ui-grid-a">
-                        <div class="ui-block-a">
-							<input type="button" value="Start Test" class="dashboard__start_button">
+					<div class="dashboard__result_list ui-corner-all custom-corners">
+						<div class="ui-bar ui-bar-a">
+							Network
+							<span class="ui-li-count result_label">Download Speed
+								<a href="#result_explanation" data-rel="popup" data-transition="pop" class="my-tooltip-btn ui-btn ui-alt-icon ui-nodisc-icon ui-corner-all ui-btn-inline ui-icon-info ui-btn-icon-notext result_explanation" title="Learn more">Learn more</a>
+							</span>
 						</div>
-                        <div class="ui-block-b">
-                            <h3 class="label__server_location">Testing to: <span class="select__server_location"></span></h3>
-                        </div>
-                    </div>
-					<div class="dashboard__result_list">
-						<ul data-role="listview" class="list-view-header">
-							<li data-role="list-divider" class="ui-listview-header">
-								Network
-								<span class="ui-li-count result_label">Download Speed
-									<a href="#result_explanation" data-rel="popup" data-transition="pop" class="my-tooltip-btn ui-btn ui-alt-icon ui-nodisc-icon ui-corner-all ui-btn-inline ui-icon-info ui-btn-icon-notext result_explanation" title="Learn more">Learn more</a>
-								</span>
-							</li>
-						</ul>
-						<div data-role="collapsible-set" data-theme="e" data-content-theme="a"></div>
-						<ul data-role="listview" class="list-view-header dashboard__thank_you">
-							<li><a class="ui-icon-check">Completed!</a></li>
-						</ul>
+						<div class="ui-body ui-body-a">
+							<ul data-role="listview" data-inset="true">
+							</ul>
+						</div>
+						<input type="button" value="Start Test" class="dashboard__start_button" data-theme="a">
 					</div>
                 </div>
             </div>
