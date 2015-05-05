@@ -8,11 +8,12 @@
 
 'use strict';
 
-function NDTjs(server, serverPort, serverPath, callbacks, updateInterval) {
+function NDTjs(server, serverPort, serverPath, callbacks, updateInterval, metaInformation) {
   this.server = server;
   this.serverPort = serverPort || 3001;
   this.serverPath = serverPath || '/ndt_protocol';
   this.updateInterval = updateInterval / 1000.0 || false;
+  this.metaInformation = metaInformation;
   this.results = {
     c2sRate: undefined,
     s2cRate: undefined
@@ -428,6 +429,8 @@ NDTjs.prototype.ndtS2cTest = function (ndtSocket) {
  */
 NDTjs.prototype.ndtMetaTest = function (ndtSocket) {
   var errorMessage,
+    i,
+    clientMessage,
     that = this,
     state = 'WAIT_FOR_TEST_PREPARE';
 
@@ -441,8 +444,12 @@ NDTjs.prototype.ndtMetaTest = function (ndtSocket) {
     if (state === 'WAIT_FOR_TEST_START' && messageType === that.TEST_START) {
       that.callbacks.onstatechange('running_meta', that.results);
       // Send one piece of meta data and then an empty meta data packet
-      ndtSocket.send(that.makeNdtMessage(that.TEST_MSG,
-                                         'client.os.name:NDTjs'));
+      for (i in that.metaInformation) {
+        if (that.metaInformation.hasOwnProperty(i) === true) {
+          clientMessage = i + ':' + that.metaInformation[i];
+          ndtSocket.send(that.makeNdtMessage(that.TEST_MSG, clientMessage));
+        }
+      }
       ndtSocket.send(that.makeNdtMessage(that.TEST_MSG, ''));
       state = 'WAIT_FOR_TEST_FINALIZE';
       return false;

@@ -4,9 +4,12 @@
 'use strict';
 
 function InternetHealthTest() {
+  var uaInformation = (new UAParser()).getResult();
+
   this.serverQueue = [];
   this.serverList = [];
   this.resultList = [];
+  this.siteMap = {};
   this.isRunning = false;
   this.canvas = $('.canvas');
   this.lastStateChange = undefined;
@@ -32,7 +35,8 @@ function InternetHealthTest() {
   this.RESULTS_TO_DISPLAY = {
     's2cRate': 'Download',
     'c2sRate': 'Upload',
-    'MinRTT': 'Latency'
+    'MinRTT': 'Latency',
+    'packetRetransmissions': 'Packet Retransmissions'
   };
   this.domObjects = {
     'intro_overlay': this.canvas.find('.intro_overlay'),
@@ -66,6 +70,12 @@ function InternetHealthTest() {
     left: '120px' // Left position relative to parent
   };
   this.isStorageSupported = this.isLocalStorageNameSupported();
+  this.clientInformation = {
+    'client.os.name': uaInformation.os.name + " " + uaInformation.os.version,
+    'client.browser.name': uaInformation.browser.name + "/" + uaInformation.browser.version,
+    'client.application': 'NDTjs',
+    'client.version': '3.7.0'
+  };
   this.setupInterface();
 }
 
@@ -150,7 +160,7 @@ InternetHealthTest.prototype.populateHistoricalData = function (historicalData) 
 InternetHealthTest.prototype.populateResultData = function (siteId, passedResults) {
   var siteIdClass = '.' + siteId;
   var thisListView = this.domObjects.result_list.find(siteIdClass).find('ul');
-  var testResultItem, testResultValueString;
+  var testResultItem, testResultValueString, testResultValue;
 
   this.domObjects.result_list.find(siteIdClass).removeClass('ui-disabled');
   testResultItem = $('<li>').text("Transit");
@@ -159,7 +169,7 @@ InternetHealthTest.prototype.populateResultData = function (siteId, passedResult
     .text(passedResults.metadata.transit));
   thisListView.append(testResultItem);
 
-  for (var testResultValue in this.RESULTS_TO_DISPLAY) {
+  for (testResultValue in this.RESULTS_TO_DISPLAY) {
     if (this.RESULTS_TO_DISPLAY.hasOwnProperty(testResultValue)) {
       testResultValueString = this.formatMeasurementResult(testResultValue,
         passedResults[testResultValue]);
@@ -174,7 +184,7 @@ InternetHealthTest.prototype.populateResultData = function (siteId, passedResult
   this.domObjects.result_list.collapsibleset('refresh');
 };
 
-InternetHealthTest.prototype.findServers = function () {
+InternetHealthTest.prototype.findLocalServers = function (allServers) {
   var mlabNsRequest = new XMLHttpRequest(),
     mlabNsUrl = 'http://mlab-ns.appspot.com/ndt?format=json',
     that = this;
@@ -184,7 +194,7 @@ InternetHealthTest.prototype.findServers = function () {
       if (mlabNsRequest.status === 200) {
         that.mlabNsAnwer = JSON.parse(mlabNsRequest.responseText);
         that.mlabNsAnwer.metro = that.mlabNsAnwer.site.slice(0, 3);
-        that.findMoreServers(that.mlabNsAnwer);
+        that.findMoreServers(allServers, that.mlabNsAnwer);
       }
     }
   };
@@ -201,7 +211,7 @@ InternetHealthTest.prototype.findAllServers = function () {
     if (mlabNsRequest.readyState === 4) {
       if (mlabNsRequest.status === 200) {
         that.mlabNsAnwer = JSON.parse(mlabNsRequest.responseText);
-        //that.findMoreServers(that.mlabNsAnwer);
+        that.findLocalServers(that.mlabNsAnwer);;
       }
     }
   };
@@ -209,7 +219,7 @@ InternetHealthTest.prototype.findAllServers = function () {
   mlabNsRequest.send();
 };
 
-InternetHealthTest.prototype.findMoreServers = function (mlabNsAnwer) {
+InternetHealthTest.prototype.findMoreServers = function (allServers, localServer) {
   var mlabSiteListRequest = new XMLHttpRequest();
   var mlabSiteListURL = "resources/datasets/site_list.json";
   var that = this;
@@ -218,10 +228,10 @@ InternetHealthTest.prototype.findMoreServers = function (mlabNsAnwer) {
   mlabSiteListRequest.open("GET", mlabSiteListURL, true);
   mlabSiteListRequest.onload = function () {
     if (mlabSiteListRequest.status === 200) {
-      that.serverList = that.parseServerList(mlabSiteListRequest.responseText, mlabNsAnwer.metro);
-
+      that.siteMap = that.parseSiteMap(mlabSiteListRequest.responseText);
+      that.serverList = that.parseServerList(allServers, that.siteMap, localServer.metro);
       if (that.serverList.length === 0) {
-        constructedRecord = that.constructSiteRecord(mlabNsAnwer);
+        constructedRecord = that.parseSiteRecord(localServer);
         that.serverList.push(constructedRecord);
       }
       that.notifyServerListUpdate(that.serverList);
@@ -230,42 +240,70 @@ InternetHealthTest.prototype.findMoreServers = function (mlabNsAnwer) {
   mlabSiteListRequest.send();
 };
 
-InternetHealthTest.prototype.parseServerList = function (responseText, metro) {
-  var siteMap = JSON.parse(responseText);
+InternetHealthTest.prototype.parseSiteMap = function (responseText) {
+  var siteList = JSON.parse(responseText);
+  var siteMap = {}
+
+  siteList.forEach(function (siteRecord) {
+    siteMap[siteRecord.site] = siteRecord.transit;
+  });
+
+  return siteMap;
+};
+
+InternetHealthTest.prototype.parseServerList = function (allServers, siteMap, metro) {
   var that = this;
 
-  if (siteMap[metro] !== undefined) {
-    siteMap[metro].forEach(function (siteRecord) {
-      that.serverList.push(that.parseSiteRecord(siteRecord));
+  if (allServers !== undefined) {
+    allServers.forEach(function (siteRecord) {
+      if (siteRecord.site.slice(0, 3) === metro) {
+        if (siteMap.hasOwnProperty(siteRecord.site) === true) {
+          siteRecord.transit = siteMap[siteRecord.site];
+        }
+        that.serverList.push(that.parseSiteRecord(siteRecord));
+      }
     });
   }
+  this.serverList = this.shuffleArray(this.reduceDuplicates(this.serverList));
   return this.serverList;
 };
 
-InternetHealthTest.prototype.findServerAtSite = function (siteName) {
-  var siteNumber = 'mlab' + (Math.floor(Math.random() * 3) + 1);
-  return 'ndt.iupui.' + siteNumber +'.' + siteName + '.measurement-lab.org';
+InternetHealthTest.prototype.reduceDuplicates = function (serverList) {
+  var serverMap = {};
+  var uniqueServerList = [];
+  var i;
+
+  serverList.forEach(function (serverRecord) {
+    if (serverMap.hasOwnProperty(serverRecord.site) === false) {
+      serverMap[serverRecord.site] = [];
+    }
+    serverMap[serverRecord.site].push(serverRecord);
+  });
+
+  for (var i in serverMap) {
+    if (serverMap.hasOwnProperty(i)) {
+      uniqueServerList.push(serverMap[i][Math.floor(Math.random()*serverMap[i].length)]);
+    }
+  }
+  return uniqueServerList;
 };
 
 InternetHealthTest.prototype.parseSiteRecord = function (siteRecord) {
+  var transitValue;
+
+  if (siteRecord.hasOwnProperty('transit') === true) {
+    transitValue = siteRecord.transit;
+  } else {
+    transitValue = siteRecord.city;
+  }
+
   return {
-    address: this.findServerAtSite(siteRecord.site),
+    address: siteRecord.fqdn,
     port: Number('3001'),
-    transit: siteRecord.transit,
+    transit: transitValue,
     path: '/ndt_protocol',
     site: siteRecord.site,
     id: (siteRecord.site + '_' + siteRecord.transit).replace(' ', '_')
-  };
-};
-
-InternetHealthTest.prototype.constructSiteRecord = function (mlabNsAnswer) {
-  return {
-    address: this.findServerAtSite(mlabNsAnswer.site),
-    port: Number('3001'),
-    transit: mlabNsAnswer.city,
-    path: '/ndt_protocol',
-    site: mlabNsAnswer.site,
-    id: (mlabNsAnswer.site + '_' + mlabNsAnswer.transit).replace(' ', '_')
   };
 };
 
@@ -284,7 +322,7 @@ InternetHealthTest.prototype.runServerQueue = function () {
 
 InternetHealthTest.prototype.runTest = function (currentServer) {
   this.ndtClient = new NDTjs(currentServer.address,
-      currentServer.port, currentServer.path, this, 100);
+      currentServer.port, currentServer.path, this, 100, this.clientInformation);
 
   try {
     this.ndtClient.checkBrowserSupport();
@@ -317,6 +355,8 @@ InternetHealthTest.prototype.onprogress =  function (currentState,
 InternetHealthTest.prototype.onfinish = function (passedResults) {
   var currentServer;
 
+  passedResults.packetRetransmissions = Number(passedResults['PktsRetrans']) /
+    Number(passedResults['PktsOut']);
   this.resultList.push(passedResults);
   this.historicalData.push(passedResults);
 
@@ -492,6 +532,8 @@ InternetHealthTest.prototype.formatMeasurementResult = function (resultType,
     return Number(resultValue / 1000).toFixed(2) + ' Mbps';
   } else if (resultType === 'MinRTT') {
     return Number(resultValue).toFixed(2) + ' ms';
+  } else if (resultType === 'packetRetransmissions') {
+    return Number(resultValue*100).toFixed(2) + '%';
   }
   return undefined;
 };
@@ -522,10 +564,25 @@ InternetHealthTest.prototype.setProgressMeterReversed = function () {
   this.domObjects.performance_meter.addClass('reversed');
 };
 
+InternetHealthTest.prototype.shuffleArray = function (passedArray) {
+  var currentIndex = passedArray.length;
+  var temporaryValue,
+    randomIndex;
+
+  while (0 !== currentIndex) {
+
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    temporaryValue = passedArray[currentIndex];
+    passedArray[currentIndex] = passedArray[randomIndex];
+    passedArray[randomIndex] = temporaryValue;
+  }
+
+  return passedArray;
+};
 
 $(document).ready(function () {
   var dashboard = new InternetHealthTest();
-  dashboard.findServers();
+  dashboard.findAllServers();
 });
-
-

@@ -90,7 +90,7 @@
 }
 
 .canvas .ui-collapsible-set .ui-listview {
-    margin: -1em;
+  margin: 0 -1em 0 -1em;
 }
 
 .canvas .dashboard__result_list .ui-collapsible-set {
@@ -113,7 +113,7 @@
   opacity: .9;
 }
 .canvas .provider.ui-disabled.testing a {
-    background: rgb(197, 224, 246);
+    background: rgb(255, 254, 202);
 }
 
 .canvas .provider.complete .ui-btn-icon-left:after,
@@ -123,6 +123,10 @@
     .canvas .provider.complete .ui-btn-icon-notext:after {
     background-color: rgb(133, 232, 118);
 }
+.canvas .provider.complete a {
+    background: rgb(216, 255, 211);
+}
+
 
 .ui-icon-reddit:after {
 	background-image: url("/resources/images/reddit.png");
