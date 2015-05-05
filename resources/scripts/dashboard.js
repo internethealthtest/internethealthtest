@@ -387,7 +387,7 @@ InternetHealthTest.prototype.notifyTestCompletion = function (siteId, passedResu
   var siteIdClass = '.' + siteId;
   this.domObjects.result_list.find(siteIdClass).removeClass('ui-disabled');
   this.domObjects.result_list.listview('refresh');
-  this.changeRowIcon(siteId, 'plus', 'complete');
+  this.changeRowIcon(siteId, 'carat-r', 'complete');
   this.changeRowHighlight(siteId, false);
   this.changeRowResults(siteId, passedResults);
   this.populateHistoricalData(this.historicalData);
