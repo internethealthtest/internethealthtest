@@ -86,16 +86,30 @@
 
 .canvas .ui-content .ui-listview {
     margin: inherit;
-    margin-top: 1em;
 }
 
 .canvas .ui-collapsible-set .ui-listview {
   margin: 0 -1em 0 -1em;
 }
 
+.canvas .container__dashboard .ui-grid-a {
+    margin-bottom: 10px;
+}
+
 .canvas .dashboard__result_list .ui-collapsible-set {
     margin-top: 0px;
+    margin-bottom: 0px;
 }
+
+.canvas .dashboard__result_list .ui-collapsible-set .dashboard__thank_you {
+    display: none;
+}
+.canvas .dashboard__thank_you .ui-btn-icon-right:after,
+    .canvas .dashboard__thank_you .ui-btn-icon-notext:after {
+    background-color: rgb(133, 232, 118);
+}
+
+
 .canvas .dashboard__result_list .ui-li-count.result_label {
     background: none;
     color: inherit;
@@ -113,7 +127,7 @@
   opacity: .9;
 }
 .canvas .provider.ui-disabled.testing a {
-    background: rgb(255, 254, 202);
+    background: rgb(255, 255, 250);
 }
 
 .canvas .provider.complete .ui-btn-icon-left:after,
@@ -124,7 +138,7 @@
     background-color: rgb(133, 232, 118);
 }
 .canvas .provider.complete a {
-    background: rgb(216, 255, 211);
+    background: rgb(251, 255, 251);
 }
 
 
