@@ -10,7 +10,7 @@
 		<meta property="og:title" content="Internet Health Test: Is your ISP is slowing you down?" />
 		<meta property="og:image" content="http://internethealthtest.org/resources/images/share.png" />
 		<meta property="og:url" content="http://internethealthtest.org/" />
-		<meta property="og:description" content="Want to help protect the Internet? The FCC's new #NetNeutrality rules were only the first step.  It’s hard to ensure fairness and competition without good data. Run the Internet Health Test and see if your ISP is slowing you down." />
+		<meta property="og:description" content="Want to help protect the Internet? The FCC's new #NetNeutrality rules were only the first step.  It's hard to ensure fairness and competition without good data. Run the Internet Health Test and see if your ISP is slowing you down." />
 		<link rel="icon" type="image/x-icon" href="http://internethealthtest.org/resources/images/favicon.ico" />
 		<link rel="icon" type="image/png" href="http://internethealthtest.org/resources/images/favicon.png" />
 		<link rel="stylesheet" type="text/css" href="resources/stylesheets/dashboard.css"/>
@@ -45,6 +45,60 @@
 	</head>
 	<body>
         <div data-role="page" class="canvas" style="min-height: 400px">
+			<div data-role="popup" data-history="false" class="supported_browser_dialogue ui-content" data-dismissible="false">
+				<span>
+					<a class="ui-btn ui-btn-inline ui-icon-alert ui-btn-icon-notext ui-corner-all"></a>
+					We're sorry, but your browser doesn't seem to support the test requirements. To participate, please try upgrading to a newer version of your browser.
+				</span>
+			</div>
+			<div data-role="popup" data-history="false" data-overlay-theme="a" class="ui-content intro_overlay">
+				<div class="ui-grid-a">
+					<div class="ui-block-a">
+						<img src="resources/images/network.svg" class="intro_overlay_icon"/>
+						<div class="warning_text">The Internet Health Test involves speed tests that may transfer large amounts of content over your connection. If you are on a mobile broadband provider that limits data consumption or charges based on usage, please be consider testing through alternative networks.</div>
+					</div>
+					<div class="ui-block-b">
+						<h3>Is Your Internet Provider Degrading Your Connection?</h3>
+						<p>Test to find out!</p>
+						<p>Every time you run the test you provide public data to Open Internet advocates. This helps enforce strong Net Neutrality through identifying cases where business dispute harm Internet access across the United States.</p>
+						<input type="button" value="Start Test" class="dashboard__start_button">
+						<small>To learn more about the data collected see the <a href="http://www.measurementlab.net/privacy">Privacy Policy</a>.</small>
+					</div>
+				</div>
+			</div>
+			<div data-role="popup" data-history="false" data-overlay-theme="a" class="ui-content completion_overlay">
+				<div class="ui-grid-a">
+					<div class="ui-block-a">
+						<img src="resources/images/network.svg" class="intro_overlay_icon" />
+					</div>
+					<div class="ui-block-b">
+						<h3>Thank You!</h3>
+						You just contributed valuable open data that helps Open Internet advocates enforce strong Net Neutrality and ensures you get the speed and access you pay for. Tell your friends and please run the test often.
+						<input type="button" value="Test Again" class="dashboard__start_button" />
+					</div>
+				</div>
+			</div>
+			<div data-role="popup" data-history="false" data-overlay-theme="a" class="ui-content embed_overlay">
+				<a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-left">Close</a><h3>HTML Embed Code</h3>
+				<label for="textarea">Share the test on your blog or site and help us collect more information.</label>
+				<textarea name="textarea" id="textarea"><iframe src="http://internethealthtest.org" name="internethealthtest" width="600" height="400" style="border: none; margin: 0px"></iframe></textarea>
+			</div>
+			<div data-role="popup" data-history="false" data-overlay-theme="a" class="ui-content about_overlay">
+				<a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-left">Close</a>
+				<div class="ui-grid-a">
+					<div class="ui-block-a">
+					<h4>Why do these tests matter?</h4>
+						Disputes between Internet service providers have degraded the consumer broadband across the United States, as companies withhold normal upgrades in order to charge unnecessary tolls. The result is that access to popular content slows down for everyone. Running this test provides data on the harm from these practices through collecting information about potential slowdowns on your connection.
+					</div>
+					<div class="ui-block-b">
+					<h4>How does the test work?</h4>
+						The Internet Health Test runs a few short speed tests to several measurement servers on different networks to compare how your broadband connection performance varies to different parts of the Internet. This information collected from users in the same region can begin to identify cases where business disputes are interfering with broadband across. These tests shouldn't take too long and do not collect personal information from your browser.
+					</div>
+				</div>
+			</div>
+			<div data-role="popup" data-history="false" id="result_explanation" class="ui-content" data-theme="a" style="max-width:350px;">
+				Download speed is the maximum rate that your computer could receive data from the server. Each row can be expanded to display more metrics from the test.
+			</div>
 			<div data-role="panel" data-position="right" data-position-fixed="true" data-display="overlay" data-theme="a" class="panel__measurement_results">
 				<div class="ui-corner-all custom-corners">
 					<div class="ui-bar ui-bar-a">Measurement Data</div>
@@ -70,60 +124,6 @@
 				</div>
             </div>
             <div data-role="main" class="ui-content content_panel ui-grid-a">
-				<div data-role="popup" data-history="false" class="supported_browser_dialogue" class="ui-content" data-dismissible="false">
-					<span>
-						<a class="ui-btn ui-btn-inline ui-icon-alert ui-btn-icon-notext ui-corner-all"></a>
-						We're sorry, but your browser doesn't seem to support the test requirements. To participate, please try upgrading to a newer version of your browser.
-					</span>
-				</div>
-				<div data-role="popup" data-history="false" data-overlay-theme="a" class="ui-content intro_overlay">
-					<div class="ui-grid-a">
-						<div class="ui-block-a">
-							<img src="resources/images/network.svg" class="intro_overlay_icon"/>
-							<div class="warning_text">The Internet Health Test involves speed tests that may transfer large amounts of content over your connection. If you are on a mobile broadband provider that limits data consumption or charges based on usage, please be consider testing through alternative networks.</div>
-						</div>
-						<div class="ui-block-b">
-							<h3>Is Your Internet Provider Degrading Your Connection?</h3>
-							<p>Test to find out!</p>
-							<p>Every time you run the test you provide public data to Open Internet advocates. This helps enforce strong Net Neutrality through identifying cases where business dispute harm Internet access across the United States.</p>
-							<input type="button" value="Start Test" class="dashboard__start_button">
-							<small>To learn more about the data collected see the <a href="http://www.measurementlab.net/privacy">Privacy Policy</a>.</small>
-						</div>
-					</div>
-				</div>
-				<div data-role="popup" data-history="false" data-overlay-theme="a" class="ui-content completion_overlay">
-					<div class="ui-grid-a">
-						<div class="ui-block-a">
-							<img src="resources/images/network.svg" class="intro_overlay_icon"/>
-						</div>
-						<div class="ui-block-b">
-							<h3>Thank You!</h3>
-							You just contributed valuable open data that helps Open Internet advocates enforce strong Net Neutrality and ensures you get the speed and access you pay for. Tell your friends and please run the test often.
-							<input type="button" value="Test Again" class="dashboard__start_button">
-						</div>
-					</div>
-				</div>
-				<div data-role="popup" data-history="false" data-overlay-theme="a" class="ui-content embed_overlay">
-					<a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-left">Close</a><h3>HTML Embed Code</h3>
-					<label for="textarea">Share the test on your blog or site and help us collect more information.</label>
-					<textarea name="textarea" id="textarea"><iframe src="http://internethealthtest.org" name="internethealthtest" width="600" height="400" style="border: none; margin: 0px"></iframe></textarea>
-				</div>
-				<div data-role="popup" data-history="false" data-overlay-theme="a" class="ui-content about_overlay">
-					<a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-left">Close</a>
-					<div class="ui-grid-a">
-						<div class="ui-block-a">
-						<h4>Why do these tests matter?</h4>
-							Disputes between Internet service providers have degraded the consumer broadband across the United States, as companies withhold normal upgrades in order to charge unnecessary tolls. The result is that access to popular content slows down for everyone. Running this test provides data on the harm from these practices through collecting information about potential slowdowns on your connection.
-						</div>
-						<div class="ui-block-b">
-						<h4>How does the test work?</h4>
-							The Internet Health Test runs a few short speed tests to several measurement servers on different networks to compare how your broadband connection performance varies to different parts of the Internet. This information collected from users in the same region can begin to identify cases where business disputes are interfering with broadband across. These tests shouldn't take too long and do not collect personal information from your browser.
-						</div>
-					</div>
-				</div>
-				<div data-role="popup" id="result_explanation" class="ui-content" data-theme="a" style="max-width:350px;">
-					Download speed is the maximum rate that your computer could receive data from the server. Each row can be expanded to display more metrics from the test.
-				</div>
                 <div class="container__performance_meter ui-block-a ui-corner-all custom-corners">
 					<div class="ui-body ui-body-a">
 						<div class="performance_meter"></div>
