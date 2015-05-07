@@ -199,8 +199,8 @@
 }
 
 .canvas .about_overlay .ui-grid-a,
-    .canvas .intro_overlay .ui-grid-a, {
-    .canvas .completion_overlay .ui-grid-a,
+    .canvas .intro_overlay .ui-grid-a,
+    .canvas .completion_overlay .ui-grid-a {
     font-size: 0.9em;
 }
 
