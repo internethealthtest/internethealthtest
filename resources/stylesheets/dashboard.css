@@ -10,6 +10,7 @@
 }
 .canvas {
     margin: auto;
+    min-height: none;
     background: #ffffff; /* Old browsers */
     background: -moz-linear-gradient(left, #ffffff 28%, #f6f6f6 77%, #ffffff 97%); /* FF3.6+ */
     background: -webkit-gradient(linear, left top, right top, color-stop(28%,#ffffff), color-stop(77%,#f6f6f6), color-stop(97%,#ffffff)); /* Chrome,Safari4+ */
@@ -40,7 +41,7 @@
     -moz-box-shadow: inset 0 3px 8px rgba(0,0,0,.4);
     -webkit-box-shadow: inset 0 3px 8px rgba(0,0,0,.4);
     box-shadow: inset 0 3px 8px rgba(0,0,0,.24);
-    min-height: 256px;
+    min-height: 358px;
     padding: 0;
     position : absolute !important; 
     top : 40px !important;  
@@ -75,11 +76,11 @@
     vertical-align: middle;
 }
 
-.canvas .content_panel .container__performance_meter .performance_meter .test_control_enabled {
+.canvas .content_panel .container__performance_meter .performance_meter {
     cursor: pointer;
 }
 
-.canvas .content_panel .container__performance_meter .performance_meter .test_control_enabled :hover {
+.canvas .content_panel .container__performance_meter .performance_meter :hover {
     cursor: pointer;
 }
 
@@ -169,14 +170,11 @@
 	background-image: url("/resources/images/wordpress.png");
 }
 
-.canvas .ui-grid-a .container__performance_meter .ui-block-a {
+.canvas .ui-grid-a .container__performance_meter,
+    .canvas .intro_overlay .ui-block-a {
     text-align: center;
 }
 
-.canvas .ui-grid-a .ui-block-a .intro_overlay_icon {
-    height: 16em;
-    margin-top: 3em;
-}
 
 .canvas .label__server_location {
   color: rgb(175, 175, 175);
@@ -197,6 +195,39 @@
 
 .canvas .about_overlay .ui-grid-a .ui-block-a {
     padding-right: 10px;
+}
+
+.canvas .about_overlay .ui-grid-a,
+    .canvas .intro_overlay .ui-grid-a {
+    font-size: 0.9em;
+}
+
+
+.canvas .intro_overlay .ui-grid-a .ui-block-a .intro_overlay_icon {
+    height: 16em;
+    margin-top: 3em;
+}
+
+.canvas .intro_overlay .ui-grid-a .ui-block-a.mobile_warning .intro_overlay_icon {
+    height: 11em;
+    margin-top: 1em;
+}
+.canvas .intro_overlay .ui-grid-a .ui-block-a .warning_text {
+    display: none;
+}
+
+.canvas .intro_overlay  .ui-grid-a .ui-block-a.mobile_warning .warning_text {
+    display: block;
+    font-style: italic;
+    text-align: left;
+    background-color: rgb(255, 255, 240);
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 4px;
+    padding-right: 4px;
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
 }
 
 .canvas .dashboard__thank_you input {

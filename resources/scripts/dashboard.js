@@ -42,6 +42,7 @@ function InternetHealthTest() {
   this.domObjects = {
     'intro_overlay': this.canvas.find('.intro_overlay'),
     'about_overlay': this.canvas.find('.about_overlay'),
+    'about_overlay__mobile_warning': this.canvas.find('.intro_overlay  .ui-grid-a .ui-block-a'),
     'embed_overlay': this.canvas.find('.embed_overlay'),
     'performance_meter': this.canvas.find('.performance_meter'),
     'performance_meter_objects': this.canvas.find('.performance_meter div'),
@@ -85,6 +86,11 @@ function InternetHealthTest() {
 
 InternetHealthTest.prototype.setupInterface = function () {
   var that = this;
+
+  if (this.isMobile() === true) {
+    this.domObjects.about_overlay__mobile_warning.addClass('mobile_warning');
+  }
+
   this.domObjects.intro_overlay.popup();
   this.domObjects.about_overlay.popup();
   this.domObjects.embed_overlay.popup();
@@ -405,7 +411,6 @@ InternetHealthTest.prototype.notifyServerQueueCompletion = function () {
   this.domObjects.start_button.val('Test Again').button('refresh');
   this.domObjects.start_button.button('enable');
   this.domObjects.completion_notice.popup('open');
-  this.notifyResultListUpdate();
   this.domObjects.performance_meter.percentageLoader({value: 'Complete'});
   this.setProgressMeterCompleted();
 };
@@ -477,8 +482,8 @@ InternetHealthTest.prototype.resetDashboard = function () {
 };
 
 
-InternetHealthTest.prototype.notifyResultListUpdate = function () {
-  return;
+InternetHealthTest.prototype.isMobile = function () {
+  return (/iPhone|Android|BlackBerry/).test(navigator.userAgent);
 };
 
 InternetHealthTest.prototype.notifyStateChange = function (newState, passedResults) {
