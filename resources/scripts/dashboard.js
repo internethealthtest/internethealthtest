@@ -98,7 +98,7 @@ InternetHealthTest.prototype.setupInterface = function () {
   this.domObjects.supported_browser_dialogue.popup();
 
   if (this.checkBrowserSupport() === false) {
-    this.domObjects.supported_browser_dialogue.popup('open');
+    $('.supported_browser_dialogue').popup('open');
     return false;
   }
   
