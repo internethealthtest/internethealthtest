@@ -97,48 +97,47 @@ InternetHealthTest.prototype.setupInterface = function () {
   this.domObjects.start_button.button();
   this.domObjects.supported_browser_dialogue.popup();
 
-//  if (this.checkBrowserSupport() === false) {
-//    this.domObjects.supported_browser_dialogue.popup('open');
-//    return false;
-//  }
-  
-  this.domObjects.start_button.button('enable');
-  this.domObjects.start_button.focus();
-  this.domObjects.performance_meter.percentageLoader({value: 'Upload'});
-  this.domObjects.performance_meter.find('div div').text('Start');
-  this.domObjects.performance_meter.addClass('test_control_enabled');
+  if (this.checkBrowserSupport() === true) {
+    
+    this.domObjects.start_button.button('enable');
+    this.domObjects.start_button.focus();
+    this.domObjects.performance_meter.percentageLoader({value: 'Upload'});
+    this.domObjects.performance_meter.find('div div').text('Start');
+    this.domObjects.performance_meter.addClass('test_control_enabled');
 
-  $.merge(this.historicalData, this.getlocalStorage());
-  this.populateHistoricalData(this.historicalData);
+    $.merge(this.historicalData, this.getlocalStorage());
+    this.populateHistoricalData(this.historicalData);
 
-  this.domObjects.start_button.click(function () {
-    that.domObjects.intro_overlay.popup('close');
-    that.domObjects.completion_notice.popup('close');
-    if (that.resultList.length > 0) {
-      that.resetDashboard();
-    }
-    that.runServerQueue();
-  });
-  this.domObjects.performance_meter.find('div').first().click(function () {
-    if (that.domObjects.performance_meter.hasClass('test_control_enabled') === true) {
+    this.domObjects.start_button.click(function () {
+      that.domObjects.intro_overlay.popup('close');
+      that.domObjects.completion_notice.popup('close');
       if (that.resultList.length > 0) {
         that.resetDashboard();
       }
       that.runServerQueue();
+    });
+    this.domObjects.performance_meter.find('div').first().click(function () {
+      if (that.domObjects.performance_meter.hasClass('test_control_enabled') === true) {
+        if (that.resultList.length > 0) {
+          that.resetDashboard();
+        }
+        that.runServerQueue();
+      }
+    });
+
+    this.domObjects.about_button.click(function () {
+      that.domObjects.about_overlay.popup('open');
+    });
+    this.domObjects.embed_button.click(function () {
+      that.domObjects.embed_overlay.popup('open');
+    });
+    if (that.historicalData.length === 0) {
+      window.setTimeout( function () {
+        that.domObjects.intro_overlay.popup('open');
+      }, 1000);
     }
-  });
-
-  this.domObjects.about_button.click(function () {
-    that.domObjects.about_overlay.popup('open');
-  });
-  this.domObjects.embed_button.click(function () {
-    that.domObjects.embed_overlay.popup('open');
-  });
-  if (that.historicalData.length === 0) {
-    window.setTimeout( function () {
-
-    that.domObjects.intro_overlay.popup('open');
-  }, 1000);
+  } else {
+    this.domObjects.supported_browser_dialogue.popup('open');
   }
 };
 
