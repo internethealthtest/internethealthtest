@@ -95,7 +95,6 @@ InternetHealthTest.prototype.setupInterface = function () {
   this.domObjects.about_overlay.popup();
   this.domObjects.embed_overlay.popup();
   this.domObjects.start_button.button();
-  this.domObjects.supported_browser_dialogue.popup();
 
   if (this.checkBrowserSupport() === true) {
     
@@ -137,6 +136,7 @@ InternetHealthTest.prototype.setupInterface = function () {
       }, 1000);
     }
   } else {
+    this.domObjects.supported_browser_dialogue.popup();
     this.domObjects.supported_browser_dialogue.popup('open');
   }
 };

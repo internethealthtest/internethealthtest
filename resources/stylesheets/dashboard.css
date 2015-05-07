@@ -204,6 +204,9 @@
     font-size: 0.9em;
 }
 
+.canvas .supported_browser_dialogue p {
+    float: right;
+}
 
 .canvas .intro_overlay .ui-grid-a .ui-block-a .intro_overlay_icon,
     .canvas .completion_overlay .ui-grid-a .ui-block-a .intro_overlay_icon {
