@@ -583,7 +583,7 @@ NDTjs.prototype.startTest = function () {
   };
 };
 
-if (ArrayBuffer !== undefined) {
+if ('ArrayBuffer' in window) {
   if (!ArrayBuffer.prototype.slice) {
     ArrayBuffer.prototype.slice = function (begin, end) {
       var len = this.byteLength;
