@@ -110,14 +110,14 @@ InternetHealthTest.prototype.setupInterface = function () {
     this.domObjects.start_button.click(function () {
       that.domObjects.intro_overlay.popup('close');
       that.domObjects.completion_notice.popup('close');
-      if (that.resultList.length > 0) {
+      if (Object.keys(that.resultList).length > 0) {
         that.resetDashboard();
       }
       that.runServerQueue();
     });
     this.domObjects.performance_meter.find('div').first().click(function () {
       if (that.domObjects.performance_meter.hasClass('test_control_enabled') === true) {
-        if (that.resultList.length > 0) {
+        if (Object.keys(that.resultList).length > 0) {
           that.resetDashboard();
         }
         that.runServerQueue();
