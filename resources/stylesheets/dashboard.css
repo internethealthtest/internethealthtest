@@ -171,7 +171,8 @@
 }
 
 .canvas .ui-grid-a .container__performance_meter,
-    .canvas .intro_overlay .ui-block-a {
+    .canvas .intro_overlay .ui-block-a,
+    .canvas .completion_overlay .ui-block-a {
     text-align: center;
 }
 
@@ -198,14 +199,16 @@
 }
 
 .canvas .about_overlay .ui-grid-a,
-    .canvas .intro_overlay .ui-grid-a {
+    .canvas .intro_overlay .ui-grid-a, {
+    .canvas .completion_overlay .ui-grid-a,
     font-size: 0.9em;
 }
 
 
-.canvas .intro_overlay .ui-grid-a .ui-block-a .intro_overlay_icon {
-    height: 16em;
-    margin-top: 3em;
+.canvas .intro_overlay .ui-grid-a .ui-block-a .intro_overlay_icon,
+    .canvas .completion_overlay .ui-grid-a .ui-block-a .intro_overlay_icon {
+    height: 14em;
+    margin-top: 1em;
 }
 
 .canvas .intro_overlay .ui-grid-a .ui-block-a.mobile_warning .intro_overlay_icon {

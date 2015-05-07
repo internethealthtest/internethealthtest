@@ -96,6 +96,11 @@ InternetHealthTest.prototype.setupInterface = function () {
   this.domObjects.embed_overlay.popup();
   this.domObjects.start_button.button();
   this.domObjects.supported_browser_dialogue.popup();
+
+  if (this.checkBrowserSupport() === false) {
+    this.domObjects.supported_browser_dialogue.popup('open');
+    return false;
+  }
   
   this.domObjects.start_button.button('enable');
   this.domObjects.start_button.focus();
@@ -135,6 +140,13 @@ InternetHealthTest.prototype.setupInterface = function () {
     that.domObjects.intro_overlay.popup('open');
   }, 1000);
   }
+};
+
+InternetHealthTest.prototype.checkBrowserSupport = function () {
+  if (window.WebSocket === undefined && window.MozWebSocket === undefined) {
+    return false;
+  }
+  return true;
 };
 
 InternetHealthTest.prototype.isLocalStorageNameSupported = function () {
