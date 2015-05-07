@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<title>Internet Health Test: Is your ISP is slowing you down?</title>
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" charset="utf-8"/>
 		<meta charset="utf-8"/>
 		<meta property="og:type" content="article" />
 		<meta property="og:locale" content="en_US" />
 		<meta property="og:site_name" content="Internet Health Test"/>
-		<meta property="og:title" content="Interconnection Health Test" />
+		<meta property="og:title" content="Internet Health Test, is your ISP is slowing you down?" />
 		<meta property="og:image" content="http://internethealthtest.org/resources/images/share.png" />
 		<meta property="og:url" content="http://internethealthtest.org/" />
-		<meta property="og:description" content="The Health Test runs a few short speed tests to some measurement servers located near you to compare how your broadband connection varies to different parts of the Internet." />
+		<meta property="og:description" content="Want to help protect the Internet? The FCC's new #NetNeutrality rules were only the first step.  It’s hard to ensure fairness and competition without good data. Run the Internet Health Test and see if your ISP is slowing you down. http://internethealthtest.org/" />
 		<link rel="icon" type="image/x-icon" href="http://internethealthtest.org/resources/images/favicon.ico" />
 		<link rel="icon" type="image/png" href="http://internethealthtest.org/resources/images/favicon.png" />
 		<link rel="stylesheet" type="text/css" href="resources/stylesheets/dashboard.css"/>
@@ -27,6 +28,19 @@
 		  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 		  ga('create', 'UA-62511773-1', 'auto');
 		  ga('send', 'pageview');
+		  
+		  var socialMediaContext = {
+			'twitter': {
+				'text': 'Want to help protect #NetNeutrality? Run the Internet Health Test and see if your ISP is slowing you down. http://internethealthtest.org/'
+				},
+			'reddit': {
+				'text': 'The Internet Health Test, is your ISP is slowing you down?',
+				'link': 'http://internethealthtest.org/'
+			},
+			'embed': {
+				'text': '<iframe src="http://internethealthtest.org" name="internethealthtest" width="600" height="400" style="border: none; margin: 0px"></iframe>'
+			}
+		  };
 		</script>
 	</head>
 	<body>
@@ -49,9 +63,9 @@
 					<a class="intro_overlay_about" data-role="button" data-mini="true" data-theme="a">What Is This?</a>
 				</div>
 				<div data-type="horizontal" class="ui-btn-right">
-					<a href="#" class="ui-btn ui-icon-twitter ui-btn-icon-notext ui-corner-all" onclick="window.open('https://twitter.com/home?status=Blah%20blah%20blah%20internethealthtest.org');" data-inline="true">Twitter</a>
+					<a href="#" class="ui-btn ui-icon-twitter ui-btn-icon-notext ui-corner-all" onclick="window.open('https://twitter.com/home?status=' + encodeURIComponent(socialMediaContext['twitter']['text']));" data-inline="true">Twitter</a>
 					<a href="#" class="ui-btn ui-icon-facebook ui-btn-icon-notext ui-corner-all" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=internethealthtest.org');" data-inline="true">Facebook</a>
-					<a href="#" onclick="window.open('http://www.reddit.com/r/technology/submit?url=' + encodeURIComponent('http://internethealthtest.org') + '&title=' + encodeURIComponent('Internet Health Test'));" class="ui-btn ui-icon-reddit ui-btn-icon-notext ui-corner-all" data-inline="true">Reddit</a>
+					<a href="#" onclick="window.open('http://www.reddit.com/r/technology/submit?url=' + encodeURIComponent(socialMediaContext['reddit']['link']) + '&title=' + encodeURIComponent(socialMediaContext['reddit']['text']));" class="ui-btn ui-icon-reddit ui-btn-icon-notext ui-corner-all" data-inline="true">Reddit</a>
 					<a href="#" class="ui-btn ui-icon-wordpress ui-btn-icon-notext ui-corner-all intro_overlay_embed" data-inline="true">Embed</a>
 				</div>
             </div>
@@ -68,8 +82,11 @@
 							<img src="resources/images/network.svg" class="intro_overlay_icon"/>
 						</div>
 						<div class="ui-block-b">
-							<h3>Welcome to the Internet Health Test!</h3>
-								The Health Test runs a few short speed tests to some measurement servers located near you to compare how your broadband connection varies to different parts of the Internet. These tests shouldn't take too long and do not collect personal information from your browser.
+							<h3>Is your Internet provider degrading your performance? Test to find out!</h3>
+							Every time you run the test you provide public data to Open Internet advocates. This helps enforce strong Net Neutrality.
+							
+							<br />
+<!--							<div class="mobile_warning">Testing requires downloading data, which may </div>-->
 							<br /><br />
 							<input type="button" value="Start Test" class="dashboard__start_button">
 							<br />
@@ -77,23 +94,34 @@
 						</div>
 					</div>
 				</div>
+				<div data-role="popup" data-history="false" data-overlay-theme="a" class="ui-content completion_overlay">
+					<div class="ui-grid-a">
+						<div class="ui-block-a">
+							<img src="resources/images/network.svg" class="intro_overlay_icon"/>
+						</div>
+						<div class="ui-block-b">
+							<h3>Thank You!</h3>
+							You just contributed valuable open data that helps Open Internet advocates enforce strong Net Neutrality and ensures you get the speed and access you pay for. Tell your friends and please run the test often.
+							<br /><br />
+							<input type="button" value="Test Again" class="dashboard__start_button">
+						</div>
+					</div>
+				</div>
 				<div data-role="popup" data-history="false" data-overlay-theme="a" class="ui-content embed_overlay">
-				    <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-left">Close</a>
-					<label for="textarea">HTML embed code</label>
+				    <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-left">Close</a><h3>HTML Embed Code</h3>
+					<label for="textarea">Share the test on your blog or site and help us collect more information.</label>
 					<textarea name="textarea" id="textarea"><iframe src="http://internethealthtest.org" name="internethealthtest" width="600" height="400" style="border: none; margin: 0px"></iframe></textarea>
 				</div>
 				<div data-role="popup" data-history="false" data-overlay-theme="a" class="ui-content about_overlay">
+					<a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-left">Close</a>
 					<div class="ui-grid-a">
 						<div class="ui-block-a">
-							ISP’s have degraded the performance of connections between networks on the Internet in order to charge tolls. The result is that access to content such as Netflix slows down for everyone until the ISPs are paid. This test runs speed measurements to different locations across the Internet to find points of congestion that could be degrading your access. Running this test provides data, and gives you some information about your connection performance from your ISP to a number of key locations.
+						<h4>What does this test?</h4>
+							Internet providers have degraded the connectivity between networks on the Internet in order to charge tolls. The result is that access to content, such as Netflix, slows down for everyone until the companies are paid. Running this test provides data, and gives researchers some information about potential slowdowns in your connection.
 						</div>
 						<div class="ui-block-b">
-							<h3>Welcome to the Internet Health Test!</h3>
-								The Health Test runs a few short speed tests to some measurement servers located near you to compare how your broadband connection varies to different parts of the Internet. These tests shouldn't take too long and do not collect personal information from your browser.
-							<br /><br />
-							<input type="button" value="Start Test" class="dashboard__start_button">
-							<br />
-							<small>To learn more about the data collected see the <a href="http://www.measurementlab.net/privacy">Privacy Policy</a>.</small>
+						<h4>How does this work?</h4>
+							The Health Test runs a few short speed tests to several measurement servers to compare how your broadband connection varies to different parts of the Internet. These tests shouldn't take too long and do not collect personal information from your browser.
 						</div>
 					</div>
 				</div>
@@ -105,13 +133,13 @@
 						<div class="performance_meter"></div>
 					</div>
 					<div class="ui-bar ui-bar-a">
-						<h3 class="label__server_location">Testing to: <span class="select__server_location"></span></h3>
+						<h3 class="label__server_location">Your Region: <span class="select__server_location"></span></h3>
 					</div>
                 </div>
                 <div class="container__dashboard ui-block-b">
 					<div class="dashboard__result_list ui-corner-all custom-corners">
 						<div class="ui-bar ui-bar-a">
-							Network
+							Tests
 							<span class="ui-li-count result_label">Download Speed
 								<a href="#result_explanation" data-rel="popup" data-transition="pop" class="my-tooltip-btn ui-btn ui-alt-icon ui-nodisc-icon ui-corner-all ui-btn-inline ui-icon-info ui-btn-icon-notext result_explanation" title="Learn more">Learn more</a>
 							</span>

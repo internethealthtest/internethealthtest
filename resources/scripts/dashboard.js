@@ -4,8 +4,9 @@
 'use strict';
 
 function InternetHealthTest() {
-  var uaInformation = (new UAParser()).getResult();
-
+  
+  this.uaParser = new UAParser();
+  this.uaInformation = this.uaParser.getResult();
   this.serverQueue = [];
   this.serverList = [];
   this.resultList = {};
@@ -52,7 +53,7 @@ function InternetHealthTest() {
     'about_button': this.canvas.find('.intro_overlay_about'),
     'embed_button': this.canvas.find('.intro_overlay_embed'),
     'supported_browser_dialogue': this.canvas.find('.supported_browser_dialogue'),
-    'completion_notice': this.canvas.find('.dashboard__thank_you'),
+    'completion_notice': this.canvas.find('.completion_overlay'),
     'measurement_panel': this.canvas.find('.panel__measurement_results'),
     'measurement_panel_list': this.canvas.find('.panel__measurement_results  .ui-listview')
   };
@@ -74,8 +75,8 @@ function InternetHealthTest() {
   };
   this.isStorageSupported = this.isLocalStorageNameSupported();
   this.clientInformation = {
-    'client.os.name': uaInformation.os.name + " " + uaInformation.os.version,
-    'client.browser.name': uaInformation.browser.name + "/" + uaInformation.browser.version,
+    'client.os.name': this.uaInformation.os.name + " " + this.uaInformation.os.version,
+    'client.browser.name': this.uaInformation.browser.name + "/" + this.uaInformation.browser.version,
     'client.application': 'NDTjs',
     'client.version': '3.7.0'
   };
@@ -101,7 +102,7 @@ InternetHealthTest.prototype.setupInterface = function () {
 
   this.domObjects.start_button.click(function () {
     that.domObjects.intro_overlay.popup('close');
-    that.domObjects.completion_notice.hide();
+    that.domObjects.completion_notice.popup('close');
     if (that.resultList.length > 0) {
       that.resetDashboard();
     }
@@ -163,7 +164,7 @@ InternetHealthTest.prototype.populateHistoricalData = function (historicalData) 
 
 InternetHealthTest.prototype.findLocalServers = function (allServers) {
   var mlabNsRequest = new XMLHttpRequest(),
-    mlabNsUrl = 'http://mlab-ns.appspot.com/ndt?format=json',
+    mlabNsUrl = 'http://mlab-ns.appspot.com/ndt?format=json&policy=geo',
     that = this;
 
   mlabNsRequest.onreadystatechange = function () {
@@ -403,7 +404,7 @@ InternetHealthTest.prototype.notifyServerQueueCompletion = function () {
   this.domObjects.performance_meter.addClass('test_control_enabled');
   this.domObjects.start_button.val('Test Again').button('refresh');
   this.domObjects.start_button.button('enable');
-  this.domObjects.completion_notice.show();
+  this.domObjects.completion_notice.popup('open');
   this.notifyResultListUpdate();
   this.domObjects.performance_meter.percentageLoader({value: 'Complete'});
   this.setProgressMeterCompleted();
@@ -453,7 +454,7 @@ InternetHealthTest.prototype.notifyServerListUpdate = function (serverList) {
       .addClass('provider')
       .addClass(siteRecord.id);
     temporaryRow.append($("<a>")
-      .text(siteRecord.transit)); //"Connection " + i
+      .text("Connection " + i)); //
     temporaryRow.click(function () {
       onclickSiteId = $(this).data('site_id');
       that.populatePanelData(onclickSiteId);

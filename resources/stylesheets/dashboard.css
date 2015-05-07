@@ -169,7 +169,7 @@
 	background-image: url("/resources/images/wordpress.png");
 }
 
-.canvas .ui-grid-a .ui-block-a {
+.canvas .ui-grid-a .container__performance_meter .ui-block-a {
     text-align: center;
 }
 
@@ -194,6 +194,11 @@
 .canvas .dashboard__thank_you {
     display: none;
 }
+
+.canvas .about_overlay .ui-grid-a .ui-block-a {
+    padding-right: 10px;
+}
+
 .canvas .dashboard__thank_you input {
     background: rgb(133, 232, 118);
 }
