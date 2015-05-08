@@ -198,6 +198,22 @@ InternetHealthTest.prototype.populateHistoricalData = function (historicalData) 
   this.domObjects.historical_information.text(historicalDataSize);
 };
 
+InternetHealthTest.prototype.shortenLink = function (sharedUrl) {
+  var that = this;
+  var accessToken = "24fd574f4058fd5ec46392243c21eb3e9d1915a8";
+
+  $.ajax({
+    url: "https://api-ssl.bitly.com/v3/shorten",
+    data: {'longUrl': sharedUrl, 'access_token': accessToken},
+    dataType:"jsonp",
+    success: function(v) {
+        that.notifyShareableLink(v.data.url, false);
+        return v.data.url;
+      }
+    });
+}
+
+
 InternetHealthTest.prototype.findLocalServers = function (allServers) {
   var mlabNsRequest = new XMLHttpRequest(),
     mlabNsUrl = 'http://mlab-ns.appspot.com/ndt?format=json&policy=geo',
@@ -424,6 +440,21 @@ InternetHealthTest.prototype.notifyTestStart = function (currentServer) {
   this.changeRowHighlight(currentServer.id, true);
 };
 
+InternetHealthTest.prototype.notifyShareableLink = function (shareableInformation_link, introOverlay) {
+  var targetOverlay;
+  introOverlay = introOverlay || false;
+
+  if (introOverlay === true) {
+    targetOverlay = this.domObjects.intro_overlay;
+  } else {
+    targetOverlay = this.domObjects.completion_overlay;
+  }
+
+  targetOverlay.find('.result_url_share').val(shareableInformation_link);
+  targetOverlay.find('.result_url_share').trigger('create');
+};
+
+
 InternetHealthTest.prototype.notifyShareableResults = function (shareableInformation, introOverlay) {
   introOverlay = introOverlay || false;
   var targetOverlay, targetOverlayResults;
@@ -453,8 +484,7 @@ InternetHealthTest.prototype.notifyShareableResults = function (shareableInforma
   }
   
   if (shareableInformation.link !== undefined) {
-    targetOverlay.find('.result_url_share').val(shareableInformation.link);
-    targetOverlay.find('.result_url_share').trigger('create');
+    this.shortenLink(shareableInformation.link);
   }
 };
 
