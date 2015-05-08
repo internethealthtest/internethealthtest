@@ -32,11 +32,30 @@
 		  
 		  var socialMediaContext = {
 			'twitter': {
-				'text': 'Want to help protect #NetNeutrality? Run the Internet Health Test and see if your ISP is slowing you down. http://internethealthtest.org/'
+				'text': 'Want to help protect #NetNeutrality? Run the Internet Health Test and see if your ISP is slowing you down. http://internethealthtest.org/',
+				'share': function() {
+						var shareUrl = $('.result_url_share').val();
+						var tweetText = 'Check out my #InternetHealthTest result! See if your ISP is slowing you down and help protect the Internet. ' +  shareUrl;
+						return 'https://twitter.com/home?status=' + encodeURIComponent(tweetText);
+					}
 				},
 			'reddit': {
 				'text': 'The Internet Health Test: Is your ISP is slowing you down?',
 				'link': 'http://internethealthtest.org/'
+			},
+			'facebook': {
+				'share': function() {
+						var shareUrl = $('.result_url_share').val();
+						return 'https://www.facebook.com/sharer/sharer.php?u='  + encodeURIComponent(shareUrl);
+					}
+			},
+			'email': {
+				'share': function() {
+						var title = 'Check Out My Internet Health Test Result!';
+						var shareUrl = $('.result_url_share').val();
+						var body = "Did you know that broadband performance can differ across different parts of the Internet? I ran the Internet Health Test to check for slowdowns on my Internet connection. You should too!\n\n" + shareUrl;
+						return 'mailto:?subject='  + encodeURIComponent(title) + '&body=' + encodeURIComponent(body);
+					}
 			},
 			'embed': {
 				'text': '<iframe src="http://internethealthtest.org" name="internethealthtest" width="600" height="400" style="border: none; margin: 0px"></iframe>'
@@ -119,9 +138,9 @@
 						<div class="ui-body ui-body-a">
 							<p>You just contributed valuable open data that helps Open Internet advocates enforce strong Net Neutrality and ensures you get the speed and access you pay for. Tell your friends and please run the test often.</p>
 							<div data-role="controlgroup" data-type="horizontal" data-mini="true">
-								<input type="button" data-icon="twitter" onclick="window.open();" data-inline="true" value="Tweet" />
-								<input type="button" data-icon="facebook" onclick="window.open();" data-inline="true" value="Share" />
-								<input type="button" data-icon="email" onclick="window.open();" data-inline="true" value="Mail" />
+								<input type="button" data-icon="twitter" onclick="window.open(socialMediaContext['twitter']['share']());" data-inline="true" value="Tweet" />
+								<input type="button" data-icon="facebook" onclick="window.open(socialMediaContext['facebook']['share']());" data-inline="true" value="Share" />
+								<input type="button" data-icon="email" onclick="window.open(socialMediaContext['email']['share']());" data-inline="true" value="Mail" />
 							</div>
 							<label for="result_url_share">
 								Shareable Link:
@@ -188,7 +207,7 @@
                 <div class="container__dashboard ui-block-b">
 					<div class="dashboard__result_list ui-corner-all custom-corners">
 						<div class="ui-bar ui-bar-a">
-							Interconnections
+							Steps
 							<span class="ui-li-count result_label">Speed
 								<a href="#result_explanation" data-rel="popup" data-transition="pop" class="my-tooltip-btn ui-btn ui-alt-icon ui-nodisc-icon ui-corner-all ui-btn-inline ui-icon-info ui-btn-icon-notext result_explanation" title="Learn more">Learn more</a>
 							</span>
