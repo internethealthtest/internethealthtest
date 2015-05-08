@@ -664,7 +664,7 @@ InternetHealthTest.prototype.notifyServerListUpdate = function (serverList) {
       .addClass('provider')
       .addClass(siteRecord.id);
     temporaryRow.append($("<a>")
-      .text("Connection " + i)); //
+      .text("Step " + i)); //
     temporaryRow.click(function () {
       onclickSiteId = $(this).data('site_id');
       that.populatePanelData(onclickSiteId);
