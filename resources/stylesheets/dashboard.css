@@ -170,12 +170,20 @@
 	background-image: url("/resources/images/wordpress.png");
 }
 
+.ui-icon-email:after {
+	background-image: url("/resources/images/email.png");
+}
+
 .canvas .ui-grid-a .container__performance_meter,
     .canvas .intro_overlay .ui-block-a,
     .canvas .completion_overlay .ui-block-a {
     text-align: center;
 }
 
+.canvas .slow_links h4 {
+    white-space: normal !important;
+    text-align: center;
+}
 
 .canvas .label__server_location {
   color: rgb(175, 175, 175);
@@ -190,6 +198,24 @@
     color: #777;
 }
 
+.canvas .test_series_chart {
+    width: 240px;
+    margin-bottom: -10px;
+}
+
+.canvas .shared_results,
+    .canvas .shared_results .ui-bar,
+    .canvas .shared_results .ui-body {
+    border: none;
+    background: none;
+    text-transform: capitalize;
+}
+
+
+.canvas .intro_overlay .shared_results {
+    display: none;
+}
+
 .canvas .dashboard__thank_you {
     display: none;
 }
@@ -198,10 +224,32 @@
     padding-right: 10px;
 }
 
+.canvas .infrastructure_footnote {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    font-size: .6em;
+    font-weight: normal;
+    width: 100%
+}
+
+.canvas .infrastructure_footnote p {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
 .canvas .about_overlay .ui-grid-a,
     .canvas .intro_overlay .ui-grid-a,
     .canvas .completion_overlay .ui-grid-a {
     font-size: 0.9em;
+}
+
+.canvas .completion_overlay .ui-controlgroup {
+    margin-right: 0;
+    margin-left: 0;
+    text-align: center;
+    margin-bottom: 10px;
+    margin-top: 10px;
 }
 
 .canvas .intro_overlay .ui-grid-a .ui-block-a .intro_overlay_icon,

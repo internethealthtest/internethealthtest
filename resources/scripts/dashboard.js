@@ -4,7 +4,7 @@
 'use strict';
 
 function InternetHealthTest() {
-  
+
   this.uaParser = new UAParser();
   this.uaInformation = this.uaParser.getResult();
   this.serverQueue = [];
@@ -16,6 +16,7 @@ function InternetHealthTest() {
   this.lastStateChange = undefined;
   this.mlabNsAnwer = undefined;
   this.historicalData = [];
+  this.shareableResults = {};
 
   // NDT's Test Length in milliseconds
   this.NDT_TEST_LENGTH = 10000;
@@ -41,6 +42,10 @@ function InternetHealthTest() {
   };
   this.domObjects = {
     'intro_overlay': this.canvas.find('.intro_overlay'),
+    'intro_overlay_icon': this.canvas.find('.intro_overlay .intro_overlay_icon'),
+    'intro_results': this.canvas.find('.intro_overlay .shared_results'),
+    'completion_overlay': this.canvas.find('.completion_overlay'),
+    'completion_results': this.canvas.find('.completion_overlay .shared_results'),
     'about_overlay': this.canvas.find('.about_overlay'),
     'about_overlay__mobile_warning': this.canvas.find('.intro_overlay  .ui-grid-a .ui-block-a'),
     'embed_overlay': this.canvas.find('.embed_overlay'),
@@ -54,7 +59,6 @@ function InternetHealthTest() {
     'about_button': this.canvas.find('.intro_overlay_about'),
     'embed_button': this.canvas.find('.intro_overlay_embed'),
     'supported_browser_dialogue': this.canvas.find('.supported_browser_dialogue'),
-    'completion_notice': this.canvas.find('.completion_overlay'),
     'measurement_panel': this.canvas.find('.panel__measurement_results'),
     'measurement_panel_list': this.canvas.find('.panel__measurement_results  .ui-listview')
   };
@@ -86,11 +90,12 @@ function InternetHealthTest() {
 
 InternetHealthTest.prototype.setupInterface = function () {
   var that = this;
+  var shareableInformation;
 
   if (this.isMobile() === true) {
     this.domObjects.about_overlay__mobile_warning.addClass('mobile_warning');
   }
-
+  
   this.domObjects.intro_overlay.popup();
   this.domObjects.about_overlay.popup();
   this.domObjects.embed_overlay.popup();
@@ -109,7 +114,7 @@ InternetHealthTest.prototype.setupInterface = function () {
 
     this.domObjects.start_button.click(function () {
       that.domObjects.intro_overlay.popup('close');
-      that.domObjects.completion_notice.popup('close');
+      that.domObjects.completion_overlay.popup('close');
       if (Object.keys(that.resultList).length > 0) {
         that.resetDashboard();
       }
@@ -130,9 +135,23 @@ InternetHealthTest.prototype.setupInterface = function () {
     this.domObjects.embed_button.click(function () {
       that.domObjects.embed_overlay.popup('open');
     });
-    if (that.historicalData.length === 0) {
+    
+    if (url('?t') !== null) {
+      this.shareableResults = this.unpackageShareableResults(url('?t'));
+      if (Object.keys(that.shareableResults).length > 0) {
+        shareableInformation = this.processShareableResults(this.shareableResults);
+        this.notifyShareableResults(shareableInformation, true);
+        this.domObjects.about_overlay__mobile_warning.removeClass('mobile_warning');
+        this.domObjects.intro_overlay_icon.hide();
+        this.domObjects.intro_results.show();
+      }
+    }
+    if (that.historicalData.length === 0 || Object.keys(that.shareableResults).length > 0) {
       window.setTimeout( function () {
         that.domObjects.intro_overlay.popup('open');
+        if (Object.keys(that.shareableResults).length > 0) {
+          that.createChart(that.shareableResults, true);
+        }
       }, 1000);
     }
   } else {
@@ -372,7 +391,7 @@ InternetHealthTest.prototype.onprogress =  function (currentState,
 };
 
 InternetHealthTest.prototype.onfinish = function (passedResults) {
-  var currentServer;
+  var currentServer, shareableInformation;
 
   passedResults.packetRetransmissions = Number(passedResults['PktsRetrans']) /
     Number(passedResults['PktsOut']);
@@ -389,7 +408,11 @@ InternetHealthTest.prototype.onfinish = function (passedResults) {
     currentServer = this.serverQueue.shift();
     this.runTest(currentServer);
   } else {
-    this.notifyServerQueueCompletion();
+    this.shareableResults = this.packageShareableResults(this.resultList);
+    shareableInformation = this.processShareableResults(this.shareableResults);
+    shareableInformation.link = 'http://internethealthtest.org/?t=' + this.encodeShareableResults(this.shareableResults);
+    this.notifyShareableResults(shareableInformation, false);
+    this.notifyServerQueueCompletion(shareableInformation);
     this.isRunning = false;
   }
 };
@@ -399,6 +422,175 @@ InternetHealthTest.prototype.onerror = function () { return false; };
 InternetHealthTest.prototype.notifyTestStart = function (currentServer) {
   this.changeRowIcon(currentServer.id, 'recycle', 'testing');
   this.changeRowHighlight(currentServer.id, true);
+};
+
+InternetHealthTest.prototype.notifyShareableResults = function (shareableInformation, introOverlay) {
+  introOverlay = introOverlay || false;
+  var targetOverlay, targetOverlayResults;
+  
+  if (introOverlay === true) {
+    targetOverlay = this.domObjects.intro_overlay;
+    targetOverlayResults = this.domObjects.intro_results;
+  } else {
+    targetOverlay = this.domObjects.completion_overlay;
+    targetOverlayResults = this.domObjects.completion_results;
+  }
+  targetOverlayResults.find('.consistency span')
+    .addClass(shareableInformation.consistency)
+    .text(shareableInformation.consistency);
+  
+  targetOverlayResults.find('.high span')
+    .text(this.formatMeasurementResult('c2sRate', shareableInformation.high));
+  targetOverlayResults.find('.low span')
+    .text(this.formatMeasurementResult('c2sRate', shareableInformation.low));
+  
+  if (shareableInformation.slow_links.length === 0) {
+    targetOverlayResults.find('.slow_links').hide();
+  } else if (shareableInformation.slow_links.length === 1) {
+    targetOverlayResults.find('.slow_links h4').text('Potential slow down found on one connection.');
+  } else if (shareableInformation.slow_links.length > 1) {
+    targetOverlayResults.find('.slow_links h4').text('Potential slow downs found on ' + shareableInformation.slow_links.length + ' connections.');
+  }
+  
+  if (shareableInformation.link !== undefined) {
+    targetOverlay.find('.result_url_share').val(shareableInformation.link);
+    targetOverlay.find('.result_url_share').trigger('create');
+  }
+};
+
+InternetHealthTest.prototype.processShareableResults = function (shareableResults) {
+  var that = this;
+  var allResults = [];
+  var shareableInformation = {
+    'high': undefined,
+    'median': undefined,
+    'mean': undefined,
+    'low': undefined,
+    'rsdeviation': undefined,
+    'consistency': undefined,
+    'slow_links': [],
+    'time_run': shareableResults.time_run,
+  };
+  
+  shareableResults.results.forEach(function (sharedResult) {
+    if (shareableInformation.high === undefined ||
+        sharedResult.s2cRate > shareableInformation.high) {
+      shareableInformation.high = sharedResult.s2cRate;
+    }
+    if (shareableInformation.low === undefined ||
+        sharedResult.s2cRate < shareableInformation.low) {
+      shareableInformation.low = sharedResult.s2cRate;
+    }
+    allResults.push(sharedResult.s2cRate);
+  });
+  
+  shareableInformation.mean = (allResults.reduce(function(a, b) { return a + b; }) / allResults.length);
+  shareableInformation.median = findMedian(allResults);
+  shareableInformation.rsdeviation = (standardDeviation(allResults) / shareableInformation.mean);
+  
+  if (shareableInformation.rsdeviation > 0.8) {
+    shareableInformation.consistency = 'poor';
+  } else if (shareableInformation.rsdeviation > 0.4) {
+    shareableInformation.consistency = 'fair';
+  } else if (shareableInformation.rsdeviation > 0.2) {
+    shareableInformation.consistency = 'good';
+  } else {
+    shareableInformation.consistency = 'high';
+  }
+  
+  shareableResults.results.forEach(function (sharedResult, index) {
+    if (sharedResult.s2cRate < (shareableInformation.mean * .6) ) {
+      shareableInformation.slow_links.push(sharedResult.siteId);
+    }
+  });
+
+  return shareableInformation;
+}
+
+InternetHealthTest.prototype.unpackageShareableResults = function (passedString) {
+  var sharedResultObject;
+  
+  if (passedString.slice(-1) === '/') {
+    passedString = passedString.slice(0, (passedString.length - 1))
+  }
+  try {
+    sharedResultObject = JSON.parse(decodeURIComponent(escape(window.atob(passedString))));
+  } catch (error) {
+    return {};
+  }
+  return sharedResultObject;
+};
+
+InternetHealthTest.prototype.createChart = function (shareableResults, introOverlay) {
+  introOverlay = introOverlay || false;
+  var chartContext, chartObject, chartDatasets, chartOptions, chartData, chartLabels;
+  var targetOverlayResults;
+  
+  if (introOverlay === true) {
+    targetOverlayResults = this.domObjects.intro_results;
+  } else {
+    targetOverlayResults = this.domObjects.completion_results;
+  }
+  
+  chartLabels = $.map(shareableResults.results, function (shareableResult, index) {
+    return '' //"Test " + index;
+  });
+  chartData = $.map(shareableResults.results, function (shareableResult, index) {
+    return Number(shareableResult.s2cRate / 1000).toFixed(2);
+  });
+  
+  chartContext = targetOverlayResults.find(".test_series_chart").get(0).getContext("2d");
+  chartData = {
+      labels: chartLabels,
+      datasets: [
+          {
+              label: "Measurements",
+              fillColor: "rgba(151,187,205,0.2)",
+              strokeColor: "rgba(151,187,205,1)",
+              pointColor: "rgba(151,187,205,1)",
+              pointStrokeColor: "#fff",
+              pointHighlightFill: "#fff",
+              pointHighlightStroke: "rgba(151,187,205,1)",
+              data: chartData
+          }
+      ]
+  };
+  chartOptions = {
+    responsive: false,
+    scaleBeginAtZero: true,
+    scaleShowVerticalLines: false,
+    scaleShowLabels: true,
+    scaleFontSize: 8,
+    scaleLabel: "<%=value%> Mbps",
+    tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%= value %> Mbps",
+  };
+  this.chartObject = new Chart(chartContext).Line(chartData, chartOptions);
+};
+
+InternetHealthTest.prototype.packageShareableResults = function (resultList) {
+  var that = this;
+  var temporaryRow,
+    testResultValue,
+    urlString;
+  var shareableResults = {
+    'time_run': Date.now(),
+    'results': []
+  };
+  
+  this.serverList.forEach(function (siteId) {
+    temporaryRow = {'siteId': siteId.id};
+    for (testResultValue in that.RESULTS_TO_DISPLAY) {
+      if (that.RESULTS_TO_DISPLAY.hasOwnProperty(testResultValue)) {
+        temporaryRow[testResultValue] = resultList[siteId.id][testResultValue];
+      }
+    }
+    shareableResults['results'].push(temporaryRow);
+  });
+  return shareableResults;
+};
+  
+InternetHealthTest.prototype.encodeShareableResults = function (shareableResults) {
+  return window.btoa(unescape(encodeURIComponent(JSON.stringify(shareableResults))));
 };
 
 InternetHealthTest.prototype.notifyTestCompletion = function (siteId, passedResults) {
@@ -416,12 +608,14 @@ InternetHealthTest.prototype.notifyServerQueueStart = function () {
   this.domObjects.performance_meter.removeClass('test_control_enabled');
 };
 
-InternetHealthTest.prototype.notifyServerQueueCompletion = function () {
+InternetHealthTest.prototype.notifyServerQueueCompletion = function (shareableInformation) {
   this.domObjects.performance_meter.addClass('test_control_enabled');
   this.domObjects.performance_meter.addClass('test_control_enabled');
   this.domObjects.start_button.val('Test Again').button('refresh');
   this.domObjects.start_button.button('enable');
-  this.domObjects.completion_notice.popup('open');
+
+  this.domObjects.completion_overlay.popup('open');
+  this.createChart(this.shareableResults, false)
   this.domObjects.performance_meter.percentageLoader({value: 'Complete'});
   this.setProgressMeterCompleted();
 };
@@ -552,12 +746,20 @@ InternetHealthTest.prototype.changeRowHighlight = function (rowId, highlighted) 
 
 InternetHealthTest.prototype.formatMeasurementResult = function (resultType,
     resultValue) {
+  var temporaryValue;
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
   if (resultType === 's2cRate' || resultType === 'c2sRate') {
     return Number(resultValue / 1000).toFixed(2) + ' Mbps';
   } else if (resultType === 'MinRTT') {
     return Number(resultValue).toFixed(2) + ' ms';
   } else if (resultType === 'packetRetransmissions') {
     return Number(resultValue*100).toFixed(2) + '%';
+  } else if (resultType === 'timestamp') {
+    temporaryValue = new Date(resultValue);
+    return months[temporaryValue.getMonth()] + " " + temporaryValue.getDate() +
+      " " + temporaryValue.getFullYear() + ", " + temporaryValue.getHours() + ":" +
+      (temporaryValue.getMinutes() < 10 ? '0' + temporaryValue.getMinutes() : temporaryValue.getMinutes());
   }
   return undefined;
 };
@@ -606,7 +808,47 @@ InternetHealthTest.prototype.shuffleArray = function (passedArray) {
   return passedArray;
 };
 
+
 $(document).ready(function () {
   var dashboard = new InternetHealthTest();
   dashboard.findAllServers();
 });
+
+function findMedian(data) {
+    // extract the .values field and sort the resulting array
+    var m = data.map(function(v) {
+        return v;
+    }).sort(function(a, b) {
+        return a - b;
+    });
+    var middle = Math.floor((m.length - 1) / 2); // NB: operator precedence
+    if (m.length % 2) {
+        return m[middle];
+    } else {
+        return (m[middle] + m[middle + 1]) / 2.0;
+    }
+}
+
+function standardDeviation(values){
+  var avg = average(values);
+  
+  var squareDiffs = values.map(function(value){
+    var diff = value - avg;
+    var sqrDiff = diff * diff;
+    return sqrDiff;
+  });
+  
+  var avgSquareDiff = average(squareDiffs);
+ 
+  var stdDev = Math.sqrt(avgSquareDiff);
+  return stdDev;
+}
+ 
+function average(data){
+  var sum = data.reduce(function(sum, value){
+    return sum + value;
+  }, 0);
+ 
+  var avg = sum / data.length;
+  return avg;
+}
