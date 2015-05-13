@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
+<style>
+#ahref_source_display, #iframe_source_display {
+    border: 1px solid rgba(179,179,179,1):
+    -webkit-box-shadow: inset 2px 2px 4px 0px rgba(179,179,179,1);
+    -moz-box-shadow: inset 2px 2px 4px 0px rgba(179,179,179,1);
+    box-shadow: inset 2px 2px 4px 0px rgba(179,179,179,1);
+    padding: 10px;
+}
+</style>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 <script>
 $(document).ready(function () {
@@ -8,6 +17,11 @@ $(document).ready(function () {
     var iframeSourceDisplay = $('#iframe_source_display');
     
     iframeSourceDisplay.text(iframeExample);
+
+    var ahrefExample = $('#ahref_example').html();
+    var ahrefSourceDisplay = $('#ahref_source_display');
+    
+    ahrefSourceDisplay.text(ahrefExample);
 });
 </script>
 <style>
@@ -29,5 +43,11 @@ div, pre {
 <div id="iframe_example">
 <iframe src="http://internethealthtest.org" name="internethealthtest" width="600" height="400" style="border: none; margin: 0px"></iframe>
 </div>
+<div><h3>Alternative (Link)</h3></div>
+<div id="ahref_example">
+<a href="http://internethealthtest.org" onclick="window.open(this.href, 'targetWindow','toolbar=no, location=no, status=no, menubar=no, scrollbars=no, resizable=no, width=600, height=400'); return false;">Popup</a>
+</div>
+<div><h3>Source HTML</h3></div>
+<div id="ahref_source_display"></div>
 </body>
 </html>
