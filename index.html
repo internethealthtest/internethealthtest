@@ -32,7 +32,7 @@
 		  
 		  var socialMediaContext = {
 			'twitter': {
-				'text': 'Want to help protect #NetNeutrality? Run the Internet Health Test and see if your ISP is slowing you down. http://internethealthtest.org/',
+				'text': 'Want to help protect #NetNeutrality? Run the Internet Health Test and see if your ISP is slowing you down. https://www.battleforthenet.com/internethealthtest/',
 				'share': function() {
 						var shareUrl = $('.result_url_share').val();
 						var tweetText = 'Check out my #InternetHealthTest result! See if your ISP is slowing you down and help protect the Internet. ' +  shareUrl;
@@ -41,7 +41,7 @@
 				},
 			'reddit': {
 				'text': 'The Internet Health Test: Is your ISP is slowing you down?',
-				'link': 'http://internethealthtest.org/'
+				'link': 'https://www.battleforthenet.com/internethealthtest/'
 			},
 			'facebook': {
 				'share': function() {
@@ -191,7 +191,7 @@
 				<div data-type="horizontal" class="ui-btn-right">
 					<a href="#" class="ui-btn ui-icon-calendar ui-btn-icon-notext ui-corner-all" onclick="window.open('https://www.google.com/calendar/event?action=TEMPLATE&tmeid=XzY1MWsyZDFvOGNvM2FiOWw2OHBqMmI5azZvcjQyYjlwOGgwajRiOWw4cDJqOGhhNjZjcGowYzFwOGdfMjAxNTA1MTIgaW50ZXJuZXRoZWFsdGh0ZXN0b3JnQG0&tmsrc=internethealthtestorg%40gmail.com');" data-inline="true">Calendar</a>
 					<a href="#" class="ui-btn ui-icon-twitter ui-btn-icon-notext ui-corner-all" onclick="window.open('https://twitter.com/home?status=' + encodeURIComponent(socialMediaContext['twitter']['text']));" data-inline="true">Twitter</a>
-					<a href="#" class="ui-btn ui-icon-facebook ui-btn-icon-notext ui-corner-all" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=internethealthtest.org');" data-inline="true">Facebook</a>
+					<a href="#" class="ui-btn ui-icon-facebook ui-btn-icon-notext ui-corner-all" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https://www.battleforthenet.com/internethealthtest/');" data-inline="true">Facebook</a>
 					<a href="#" onclick="window.open('http://www.reddit.com/r/technology/submit?url=' + encodeURIComponent(socialMediaContext['reddit']['link']) + '&title=' + encodeURIComponent(socialMediaContext['reddit']['text']));" class="ui-btn ui-icon-reddit ui-btn-icon-notext ui-corner-all" data-inline="true">Reddit</a>
 					<a href="#" class="ui-btn ui-icon-wordpress ui-btn-icon-notext ui-corner-all intro_overlay_embed" data-inline="true">Embed</a>
 				</div>
