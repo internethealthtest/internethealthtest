@@ -166,6 +166,10 @@
 	background-image: url("/resources/images/twitter.png");
 }
 
+.canvas .ui-icon-calendar:after {
+	background-color: rgb(226, 125, 117);
+}
+
 .ui-icon-wordpress:after {
 	background-image: url("/resources/images/wordpress.png");
 }
