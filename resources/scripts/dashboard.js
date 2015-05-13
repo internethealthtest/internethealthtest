@@ -92,6 +92,7 @@ InternetHealthTest.prototype.setupInterface = function () {
   var that = this;
   var autoStart = false;
   var shareableInformation;
+  var intervalListener;
 
   if (this.isMobile() === true) {
     this.domObjects.about_overlay__mobile_warning.addClass('mobile_warning');
@@ -119,7 +120,14 @@ InternetHealthTest.prototype.setupInterface = function () {
       if (Object.keys(that.resultList).length > 0) {
         that.resetDashboard();
       }
-      that.runServerQueue();
+      that.domObjects.performance_meter.find('.percentage_text').addClass('smallertext');
+      that.domObjects.performance_meter.find('div div').text('Preparing');
+      intervalListener = window.setInterval( function () {
+          if (that.serverList.length > 0) {
+              window.clearInterval(intervalListener);
+              that.runServerQueue();
+          }
+      }, 500);
     });
     this.domObjects.performance_meter.find('div').first().click(function () {
       if (that.domObjects.performance_meter.hasClass('test_control_enabled') === true) {
@@ -140,9 +148,14 @@ InternetHealthTest.prototype.setupInterface = function () {
     if (url('?start') !== null) {
         autoStart = true;
         this.domObjects.intro_overlay.popup('close');
-        window.setTimeout( function () {
-            that.runServerQueue();
-        }, 1000);
+        this.domObjects.performance_meter.find('.percentage_text').addClass('smallertext');
+        this.domObjects.performance_meter.find('div div').text('Preparing');
+        intervalListener = window.setInterval( function () {
+            if (that.serverList.length > 0) {
+                window.clearInterval(intervalListener);
+                that.runServerQueue();
+            }
+        }, 500);
     }
 
     if (url('?t') !== null) {
