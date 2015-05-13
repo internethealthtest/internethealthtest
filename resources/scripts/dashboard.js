@@ -90,6 +90,7 @@ function InternetHealthTest() {
 
 InternetHealthTest.prototype.setupInterface = function () {
   var that = this;
+  var autoStart = false;
   var shareableInformation;
 
   if (this.isMobile() === true) {
@@ -136,6 +137,14 @@ InternetHealthTest.prototype.setupInterface = function () {
       that.domObjects.embed_overlay.popup('open');
     });
     
+    if (url('?start') !== null) {
+        autoStart = true;
+        this.domObjects.intro_overlay.popup('close');
+        window.setTimeout( function () {
+            that.runServerQueue();
+        }, 1000);
+    }
+
     if (url('?t') !== null) {
       this.shareableResults = this.unpackageShareableResults(url('?t'));
       if (Object.keys(that.shareableResults).length > 0) {
@@ -146,7 +155,7 @@ InternetHealthTest.prototype.setupInterface = function () {
         this.domObjects.intro_results.show();
       }
     }
-    if (that.historicalData.length === 0 || Object.keys(that.shareableResults).length > 0) {
+    if ((that.historicalData.length === 0 || Object.keys(that.shareableResults).length > 0) && autoStart === false ) {
       window.setTimeout( function () {
         that.domObjects.intro_overlay.popup('open');
         if (Object.keys(that.shareableResults).length > 0) {
