@@ -448,7 +448,7 @@ InternetHealthTest.prototype.onfinish = function (passedResults) {
   } else {
     this.shareableResults = this.packageShareableResults(this.resultList);
     shareableInformation = this.processShareableResults(this.shareableResults);
-    shareableInformation.link = 'http://internethealthtest.org/?t=' + this.encodeShareableResults(this.shareableResults);
+    shareableInformation.link = 'https://www.battleforthenet.com/internethealthtest/?t=' + this.encodeShareableResults(this.shareableResults);
     this.notifyShareableResults(shareableInformation, false);
     this.notifyServerQueueCompletion(shareableInformation);
     this.isRunning = false;
