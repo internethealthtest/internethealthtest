@@ -506,7 +506,8 @@ InternetHealthTest.prototype.notifyShareableResults = function (shareableInforma
   }
   
   if (shareableInformation.link !== undefined) {
-    this.shortenLink(shareableInformation.link);
+    this.notifyShareableLink(shareableInformation.link, false);
+    //this.shortenLink(shareableInformation.link);
   }
 };
 
