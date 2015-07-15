@@ -8,12 +8,15 @@
 
 'use strict';
 
-function NDTjs(server, serverPort, serverPath, callbacks, updateInterval, metaInformation) {
+var WebSocket;
+
+function NDTjs(server, serverPort, serverPath, callbacks, updateInterval, debugLevel) {
   this.server = server;
   this.serverPort = serverPort || 3001;
   this.serverPath = serverPath || '/ndt_protocol';
   this.updateInterval = updateInterval / 1000.0 || false;
-  this.metaInformation = metaInformation;
+  this.metaInformation = {'client.application': 'NDTjs'};
+  this.debugLevel = debugLevel || false;
   this.results = {
     c2sRate: undefined,
     s2cRate: undefined
@@ -74,6 +77,8 @@ function NDTjs(server, serverPort, serverPath, callbacks, updateInterval, metaIn
  */
 NDTjs.prototype.logger = function (logMessage, debugging) {
   debugging = debugging || false;
+	// || (this.debugLevel !== undefined && this.debugLevel === true)
+
   if (debugging === true) {
     console.log(logMessage);
   }
@@ -84,8 +89,10 @@ NDTjs.prototype.logger = function (logMessage, debugging) {
  * @returns {boolean} Browser supports necessary functions for test client.
  */
 NDTjs.prototype.checkBrowserSupport = function () {
-  if (window.WebSocket === undefined && window.MozWebSocket === undefined) {
-    throw this.UnsupportedBrowser('No Websockets');
+
+  if (WebSocket === undefined && window.WebSocket === undefined && window.MozWebSocket === undefined) {
+    this.callbacks.onerror('UnsupportedBrowser');
+    throw new UnsupportedBrowser('No Websockets');
   }
   return true;
 };
@@ -97,8 +104,6 @@ NDTjs.prototype.findNdtServer = function () {
   var mlabNsRequest = new XMLHttpRequest(),
     mlabNsUrl = 'http://mlab-ns.appspot.com/ndt?format=json',
     that = this;
-  mlabNsRequest.open('GET', mlabNsUrl, false);
-  mlabNsRequest.send();
 
   mlabNsRequest.onreadystatechange = function () {
     if (mlabNsRequest.readyState === 4) {
@@ -173,9 +178,18 @@ NDTjs.prototype.makeNdtMessage = function (messageType, messageContent) {
 NDTjs.prototype.parseNdtMessage = function (buffer) {
   var i,
     response = [],
-    bufferArray = new Uint8Array(buffer),
-    message =  String.fromCharCode.apply(null,
+    bufferArray,
+    message;
+
+  try {
+    bufferArray = new Uint8Array(buffer);
+		message =  String.fromCharCode.apply(null,
                                          new Uint8Array(buffer.slice(3)));
+  } catch (caughtError) {
+    this.callbacks.onerror('TestFailureException');
+	  throw new TestFailureException(caughtError, this.server);
+  }
+
   for (i = 0; i < 3; i += 1) {
     response[i] = bufferArray[i];
   }
@@ -188,20 +202,65 @@ NDTjs.prototype.parseNdtMessage = function (buffer) {
  * @param {string} message Specific failure messages passed in the course of
  *  receiving the exception.
  */
-NDTjs.prototype.ConnectionException = function (message) {
-  this.logger(message);
-  this.callbacks.onerror(message);
+
+function ConnectionException(errorMessage, server) {
+  
+  this.reportFailureToMLab(errorMessage, server);
+  this.logger(errorMessage, true);
 };
+
+ConnectionException.prototype = Object.create(NDTjsException.prototype);
+ConnectionException.prototype.constructor = ConnectionException;
 
 /**
  * Exception related to an unsupported browser.
  * @param {string} message Specific failure messages passed in the course of
  *  receiving the exception.
  */
-NDTjs.prototype.UnsupportedBrowser = function (message) {
-  this.logger(message);
-  this.callbacks.onerror(message);
+function UnsupportedBrowser(errorMessage) {
+  
+  this.reportFailureToMLab(errorMessage, '');
+  this.logger(errorMessage, true);
 };
+
+UnsupportedBrowser.prototype = Object.create(NDTjsException.prototype);
+UnsupportedBrowser.prototype.constructor = UnsupportedBrowser;
+
+function NDTjsException() {};
+
+NDTjsException.prototype = Object.create(Error.prototype);
+NDTjsException.prototype.constructor = NDTjsException;
+
+NDTjsException.prototype.reportFailureToMLab = function (passedError, mlabServer) {
+  var diagnosticRequest = new XMLHttpRequest();
+  var diagnosticInformation = {
+                'tool': 'ndt',
+                'error': passedError,
+                'server': mlabServer
+              },
+      diagnosticInformationString = '',
+      iterationKey,
+      diagnosticAddress;
+  
+  for (iterationKey in diagnosticInformation) {
+    if (diagnosticInformation.hasOwnProperty(iterationKey)) {
+      diagnosticInformationString += iterationKey + '=' + encodeURIComponent(diagnosticInformation[iterationKey]) + '&';
+    }
+  }
+  
+  diagnosticAddress = 'https://mlab-error.appspot.com/?' + diagnosticInformationString;
+  diagnosticRequest.open('GET', diagnosticAddress, true);
+  diagnosticRequest.send();
+};
+
+NDTjsException.prototype.logger = function (logMessage, debugging) {
+  debugging = debugging || false;
+
+  if (debugging === true) {
+    console.error(logMessage);
+  }
+};
+
 
 /**
  * Exception related to test failures, such as behavior inconsistent with
@@ -209,10 +268,15 @@ NDTjs.prototype.UnsupportedBrowser = function (message) {
  * @param {string} message Specific failure messages passed in the course of
  *  receiving the exception.
  */
-NDTjs.prototype.TestFailureException = function (message) {
-  this.logger(message);
-  this.callbacks.onerror(message);
+function TestFailureException(message, server) {
+  
+  this.reportFailureToMLab(message, server);
+  this.logger(message, true);
 };
+
+TestFailureException.prototype = Object.create(NDTjsException.prototype);
+TestFailureException.prototype.constructor = TestFailureException;
+
 
 /**
  * A simple helper function to create websockets consistently.
@@ -224,7 +288,9 @@ NDTjs.prototype.TestFailureException = function (message) {
  */
 NDTjs.prototype.createWebsocket = function (serverAddress, serverPort, urlPath,
                                             protocol) {
-  var createdWebsocket = new WebSocket('ws://' + serverAddress + ':' +
+  var createdWebsocket;
+
+  createdWebsocket = new WebSocket('ws://' + serverAddress + ':' +
                                        serverPort + urlPath, protocol);
   createdWebsocket.binaryType = 'arraybuffer';
   return createdWebsocket;
@@ -350,6 +416,7 @@ NDTjs.prototype.ndtS2cTest = function (ndtSocket) {
       };
       testConnection.onmessage = function (response) {
         var hdrSize,
+		  byteLength,
           currentTime;
         if (response.data.byteLength < 126) {
           hdrSize = 2;
@@ -358,10 +425,14 @@ NDTjs.prototype.ndtS2cTest = function (ndtSocket) {
         } else {
           hdrSize = 10;
         }
-        receivedBytes += (hdrSize + response.data.byteLength);
+		
+		
+		byteLength = (response.data.byteLength !== undefined) ? response.data.byteLength : response.data.length;
+		
+        receivedBytes += (hdrSize + byteLength);
         currentTime = Date.now() / 1000.0;
         if (that.updateInterval && currentTime > (testStart + nextCallback)) {
-          that.results.s2cRate = 8 * receivedBytes / 1000
+          that.results.s2cRate = 8 * Number(receivedBytes) / 1000
             / (currentTime - testStart);
           that.callbacks.onprogress('interval_s2c', that.results);
           nextCallback += that.updateInterval;
@@ -371,7 +442,8 @@ NDTjs.prototype.ndtS2cTest = function (ndtSocket) {
 
       testConnection.onerror = function (response) {
         errorMessage = that.parseNdtMessage(response.data)[3].msg;
-        throw that.TestFailureException(errorMessage);
+        that.callbacks.onerror('ConnectionException');
+        throw new ConnectionException(errorMessage, that.server);
       };
 
       state = 'WAIT_FOR_TEST_START';
@@ -392,6 +464,11 @@ NDTjs.prototype.ndtS2cTest = function (ndtSocket) {
       }
       // Calculation per spec, compared between client and server
       // understanding.
+      for (var web100Variable in messageContent) {
+        if (messageContent.hasOwnProperty(web100Variable)) {
+          that.results[web100Variable] = messageContent[web100Variable]
+	    }
+	  }
       that.results.s2cRate = 8 * receivedBytes / 1000 / (testEnd - testStart);
       that.logger('S2C rate calculated by client: ' + that.results.s2cRate);
       that.logger('S2C rate calculated by server: ' +
@@ -444,10 +521,12 @@ NDTjs.prototype.ndtMetaTest = function (ndtSocket) {
     if (state === 'WAIT_FOR_TEST_START' && messageType === that.TEST_START) {
       that.callbacks.onstatechange('running_meta', that.results);
       // Send one piece of meta data and then an empty meta data packet
-      for (i in that.metaInformation) {
-        if (that.metaInformation.hasOwnProperty(i) === true) {
-          clientMessage = i + ':' + that.metaInformation[i];
-          ndtSocket.send(that.makeNdtMessage(that.TEST_MSG, clientMessage));
+      if (typeof that.metaInformation === "object") {
+        for (i in that.metaInformation) {
+          if (that.metaInformation.hasOwnProperty(i) === true) {
+            clientMessage = i + ':' + that.metaInformation[i];
+            ndtSocket.send(that.makeNdtMessage(that.TEST_MSG, clientMessage));
+          }
         }
       }
       ndtSocket.send(that.makeNdtMessage(that.TEST_MSG, ''));
@@ -462,7 +541,8 @@ NDTjs.prototype.ndtMetaTest = function (ndtSocket) {
     }
     errorMessage = 'Bad state and message combo for META test: ' +
       state + ', ' + messageType + ', ' + messageContent.msg;
-    throw that.TestFailureException(errorMessage);
+    that.callbacks.onerror('TestFailureException');
+    throw new TestFailureException(errorMessage, that.server);
   };
 };
 
@@ -471,8 +551,8 @@ NDTjs.prototype.ndtMetaTest = function (ndtSocket) {
  **/
 NDTjs.prototype.startTest = function () {
   var ndtSocket, activeTest, state, errorMessage, i,
-    testsToRun = [],
-    that = this;
+      testsToRun = [],
+      that = this;
 
   this.checkBrowserSupport();
   this.logger('Test started.  Waiting for connection to server...');
@@ -529,8 +609,9 @@ NDTjs.prototype.startTest = function () {
           ndtSocket.send(that.makeNdtMessage(that.MSG_WAITING, ''));
         } else if (messageContent.msg === '9977') {
           // Test failed, leave now.
-          throw that.TestFailureException('Server terminated test ' +
-            'with SRV_QUEUE 9977');
+          that.callbacks.onerror('TestFailureException');
+          throw new TestFailureException('Server terminated test ' +
+            'with SRV_QUEUE 9977', that.server);
         }
         that.logger('Got SRV_QUEUE. Ignoring and waiting for ' +
           'MSG_LOGIN.');
@@ -543,7 +624,8 @@ NDTjs.prototype.startTest = function () {
         errorMessage = 'Expected type 1 (SRV_QUEUE) or 2 (MSG_LOGIN)' +
             'but got ' + messageType + ' (' +
             that.NDT_MESSAGES[messageType] + ')';
-        throw that.TestFailureException(errorMessage);
+        that.callbacks.onerror('TestFailureException');
+        throw new TestFailureException(errorMessage, that.server);
       }
     } else if (state === 'WAIT_FOR_TEST_IDS' &&
                messageType === that.MSG_LOGIN) {
@@ -557,13 +639,22 @@ NDTjs.prototype.startTest = function () {
           testsToRun.push(that.ndtMetaTest(ndtSocket));
         } else if (tests[i] !== '') {
           errorMessage = 'Unknown test type: ' + tests[i];
-          throw that.TestFailureException(errorMessage);
+          that.callbacks.onerror('TestFailureException');
+          throw new TestFailureException(errorMessage, that.server);
         }
       }
       state = 'WAIT_FOR_MSG_RESULTS';
     } else if (state === 'WAIT_FOR_MSG_RESULTS' &&
                messageType === that.MSG_RESULTS) {
       that.logger(messageContent);
+      var lines = messageContent.msg.split('\n');
+      for (i = 0; i < lines.length; i++) {
+          var line = lines[i];
+          var record = line.split(': ');
+          var variable = record[0];
+          var result = record[1];
+          that.results[variable] = result;
+      }
     } else if (state === 'WAIT_FOR_MSG_RESULTS' &&
                messageType === that.MSG_LOGOUT) {
       ndtSocket.close();
@@ -573,36 +664,44 @@ NDTjs.prototype.startTest = function () {
     } else {
       errorMessage = 'No handler for message ' + messageType +
           ' in state ' + state;
-      throw that.TestFailureException(errorMessage);
+      that.callbacks.onerror('TestFailureException');
+      throw new TestFailureException(errorMessage, that.server);
     }
   };
 
   ndtSocket.onerror = function (response) {
     errorMessage = that.parseNdtMessage(response.data)[3].msg;
-    throw that.TestFailureException(errorMessage);
+    that.callbacks.onerror('TestFailureException');
+    throw new ConnectionException(errorMessage, that.server);
   };
 };
 
-if ('ArrayBuffer' in window) {
-  if (!ArrayBuffer.prototype.slice) {
-    ArrayBuffer.prototype.slice = function (begin, end) {
-      var len = this.byteLength;
-      begin = (begin|0) || 0;
-      end = end === (void 0) ? len : (end|0);
+(function () {
+    if (typeof module !== 'undefined' && module.exports) {
+		module.exports = NDTjs;
+		WebSocket = require('ws');
+    }
+	if ('ArrayBuffer' in window) {
+	  if (!ArrayBuffer.prototype.slice) {
+		ArrayBuffer.prototype.slice = function (begin, end) {
+		  var len = this.byteLength;
+		  begin = (begin|0) || 0;
+		  end = end === (void 0) ? len : (end|0);
 
-      // Handle negative values.
-      if (begin < 0) begin = Math.max(begin + len, 0);
-      if (end < 0) end = Math.max(end + len, 0);
+		  // Handle negative values.
+		  if (begin < 0) begin = Math.max(begin + len, 0);
+		  if (end < 0) end = Math.max(end + len, 0);
 
-      if (len === 0 || begin >= len || begin >= end) {
-        return new ArrayBuffer(0);
-      }
+		  if (len === 0 || begin >= len || begin >= end) {
+			return new ArrayBuffer(0);
+		  }
 
-      var length = Math.min(len - begin, end - begin);
-      var target = new ArrayBuffer(length);
-      var targetArray = new Uint8Array(target);
-      targetArray.set(new Uint8Array(this, begin, length));
-      return target;
-    };
-  }
-}
+		  var length = Math.min(len - begin, end - begin);
+		  var target = new ArrayBuffer(length);
+		  var targetArray = new Uint8Array(target);
+		  targetArray.set(new Uint8Array(this, begin, length));
+		  return target;
+		};
+	  }
+	}
+})();

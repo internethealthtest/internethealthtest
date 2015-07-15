@@ -17,6 +17,7 @@ function InternetHealthTest() {
   this.mlabNsAnwer = undefined;
   this.historicalData = [];
   this.shareableResults = {};
+  this.currentServer = undefined;
 
   // NDT's Test Length in milliseconds
   this.NDT_TEST_LENGTH = 10000;
@@ -82,7 +83,6 @@ function InternetHealthTest() {
   this.clientInformation = {
     'client.os.name': this.uaInformation.os.name + " " + this.uaInformation.os.version,
     'client.browser.name': this.uaInformation.browser.name + "/" + this.uaInformation.browser.version,
-    'client.application': 'NDTjs',
     'client.version': '3.7.0'
   };
   this.setupInterface();
@@ -183,7 +183,9 @@ InternetHealthTest.prototype.setupInterface = function () {
 };
 
 InternetHealthTest.prototype.checkBrowserSupport = function () {
-  if (window.WebSocket === undefined && window.MozWebSocket === undefined) {
+  var self = this;
+
+  if (WebSocket === undefined && self.WebSocket === undefined && self.MozWebSocket === undefined) {
     return false;
   }
   return true;
@@ -398,7 +400,8 @@ InternetHealthTest.prototype.runServerQueue = function () {
 
 InternetHealthTest.prototype.runTest = function (currentServer) {
   this.ndtClient = new NDTjs(currentServer.address,
-      currentServer.port, currentServer.path, this, 100, this.clientInformation);
+      currentServer.port, currentServer.path, this, 100);
+  this.ndtClient.metaInformation = this.clientInformation;
 
   try {
     this.ndtClient.checkBrowserSupport();
@@ -409,6 +412,8 @@ InternetHealthTest.prototype.runTest = function (currentServer) {
   this.ndtClient.results.metadata = currentServer;
   this.ndtClient.results.siteId = currentServer.id;
   this.notifyTestStart(currentServer);
+  this.currentServer = currentServer;
+
   this.ndtClient.startTest();
   this.isRunning = true;
 };
@@ -455,12 +460,34 @@ InternetHealthTest.prototype.onfinish = function (passedResults) {
   }
 };
 
-InternetHealthTest.prototype.onerror = function () { return false; };
+InternetHealthTest.prototype.onerror = function (passedError) {
+  var currentServer, shareableInformation;
+
+  this.notifyTestError(this.currentServer);
+
+  if (this.serverQueue.length > 0) {
+    currentServer = this.serverQueue.shift();
+    this.runTest(currentServer);
+  } else {
+    this.shareableResults = this.packageShareableResults(this.resultList);
+    shareableInformation = this.processShareableResults(this.shareableResults);
+    shareableInformation.link = 'https://www.battleforthenet.com/internethealthtest/?t=' + this.encodeShareableResults(this.shareableResults);
+    this.notifyShareableResults(shareableInformation, false);
+    this.notifyServerQueueCompletion(shareableInformation);
+    this.isRunning = false;
+  }
+};
 
 InternetHealthTest.prototype.notifyTestStart = function (currentServer) {
   this.changeRowIcon(currentServer.id, 'recycle', 'testing');
   this.changeRowHighlight(currentServer.id, true);
 };
+
+InternetHealthTest.prototype.notifyTestError = function (currentServer) {
+  this.changeRowIcon(currentServer.id, 'forbidden', 'testing');
+  this.changeRowHighlight(currentServer.id, true);
+};
+
 
 InternetHealthTest.prototype.notifyShareableLink = function (shareableInformation_link, introOverlay) {
   var targetOverlay;
@@ -631,13 +658,15 @@ InternetHealthTest.prototype.packageShareableResults = function (resultList) {
   };
   
   this.serverList.forEach(function (siteId) {
-    temporaryRow = {'siteId': siteId.id};
-    for (testResultValue in that.RESULTS_TO_DISPLAY) {
-      if (that.RESULTS_TO_DISPLAY.hasOwnProperty(testResultValue)) {
-        temporaryRow[testResultValue] = resultList[siteId.id][testResultValue];
+    if (resultList.hasOwnProperty(siteId.id) === true) {
+      temporaryRow = {'siteId': siteId.id};
+      for (testResultValue in that.RESULTS_TO_DISPLAY) {
+        if (that.RESULTS_TO_DISPLAY.hasOwnProperty(testResultValue)) {
+          temporaryRow[testResultValue] = resultList[siteId.id][testResultValue];
+        }
       }
+      shareableResults['results'].push(temporaryRow);
     }
-    shareableResults['results'].push(temporaryRow);
   });
   return shareableResults;
 };
