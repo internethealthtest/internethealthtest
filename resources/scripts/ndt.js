@@ -181,7 +181,6 @@ NDTjs.prototype.parseNdtMessage = function (buffer) {
     bufferArray,
     message;
 	
-	console.log(buffer);
 //	try {
 		bufferArray = new Uint8Array(buffer, 0, 3);
 		message =  String.fromCharCode.apply(null, new Uint8Array(buffer, 3, (buffer.byteLength - 3)));
@@ -442,7 +441,10 @@ NDTjs.prototype.ndtS2cTest = function (ndtSocket) {
       };
 
       testConnection.onerror = function (response) {
-        errorMessage = that.parseNdtMessage(response.data)[3].msg;
+		console.log(response, response.data);
+		if (response.data !== undefined) {
+			errorMessage = that.parseNdtMessage(response.data)[3].msg;
+		}
         that.callbacks.onerror('ConnectionException');
         throw new ConnectionException(errorMessage, that.server);
       };
@@ -671,7 +673,10 @@ NDTjs.prototype.startTest = function () {
   };
 
   ndtSocket.onerror = function (response) {
+		console.log(response, response.data);
+		if (response.data !== undefined) {
     errorMessage = that.parseNdtMessage(response.data)[3].msg;
+	}
     that.callbacks.onerror('TestFailureException');
     throw new ConnectionException(errorMessage, that.server);
   };
