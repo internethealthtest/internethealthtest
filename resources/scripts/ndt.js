@@ -337,6 +337,7 @@ NDTjs.prototype.ndtC2sTest = function () {
     if (currentTime < testStart + 10) {
       setTimeout(keepSendingData, 0);
     } else {
+      testConnection.close();
       return false;
     }
   };
@@ -440,8 +441,6 @@ NDTjs.prototype.ndtS2cTest = function (ndtSocket) {
       };
 
       testConnection.onerror = function (response) {
-          console.log('testConnection');
-
         //that.callbacks.onerror('ConnectionException');
         //throw new ConnectionException('ConnectionException', that.server);
       };
