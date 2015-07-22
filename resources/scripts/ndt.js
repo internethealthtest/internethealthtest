@@ -336,7 +336,6 @@ NDTjs.prototype.ndtC2sTest = function () {
     if (currentTime < testStart + 10) {
       setTimeout(keepSendingData, 0);
     } else {
-      testConnection.close();
       return false;
     }
   };
@@ -375,6 +374,7 @@ NDTjs.prototype.ndtC2sTest = function () {
         messageType === that.TEST_FINALIZE) {
       that.callbacks.onstatechange('finished_c2s', that.results);
       state = 'DONE';
+      testConnection.close();
       return true;
     }
     that.logger('C2S: State = ' + state + ' type = ' + messageType + '(' +
