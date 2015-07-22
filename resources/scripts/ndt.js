@@ -440,6 +440,8 @@ NDTjs.prototype.ndtS2cTest = function (ndtSocket) {
       };
 
       testConnection.onerror = function (response) {
+          console.log('testConnection');
+
         //that.callbacks.onerror('ConnectionException');
         //throw new ConnectionException('ConnectionException', that.server);
       };
@@ -668,6 +670,7 @@ NDTjs.prototype.startTest = function () {
   };
 
   ndtSocket.onerror = function (response) {
+    console.log('ndtSocket');
     //that.callbacks.onerror('ConnectionException');
     //throw new ConnectionException('ConnectionException', that.server);
   };
