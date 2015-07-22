@@ -181,6 +181,7 @@ NDTjs.prototype.parseNdtMessage = function (buffer) {
     bufferArray,
     message;
 
+	console.log(buffer);
 //  try {
 		bufferArray = new Uint8Array(buffer, 0, 3);
 		message =  String.fromCharCode.apply(null,
