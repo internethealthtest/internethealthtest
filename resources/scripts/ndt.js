@@ -441,12 +441,8 @@ NDTjs.prototype.ndtS2cTest = function (ndtSocket) {
       };
 
       testConnection.onerror = function (response) {
-		console.log(response, response.data);
-		if (response.data !== undefined) {
-			errorMessage = that.parseNdtMessage(response.data)[3].msg;
-		}
-        that.callbacks.onerror('ConnectionException');
-        throw new ConnectionException(errorMessage, that.server);
+		that.callbacks.onerror('ConnectionException');
+		throw new ConnectionException('ConnectionException', that.server);
       };
 
       state = 'WAIT_FOR_TEST_START';
@@ -673,12 +669,8 @@ NDTjs.prototype.startTest = function () {
   };
 
   ndtSocket.onerror = function (response) {
-		console.log(response, response.data);
-		if (response.data !== undefined) {
-    errorMessage = that.parseNdtMessage(response.data)[3].msg;
-	}
-    that.callbacks.onerror('TestFailureException');
-    throw new ConnectionException(errorMessage, that.server);
+    that.callbacks.onerror('ConnectionException');
+    throw new ConnectionException('ConnectionException', that.server);
   };
 };
 
