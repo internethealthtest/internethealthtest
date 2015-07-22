@@ -188,7 +188,7 @@ NDTjs.prototype.parseNdtMessage = function (buffer) {
 //    this.callbacks.onerror('TestFailureException');
 //	  throw new TestFailureException(caughtError, this.server);
 //  }
-
+	console.log(bufferArray, message);
   for (i = 0; i < 3; i += 1) {
     response[i] = bufferArray[i];
   }
