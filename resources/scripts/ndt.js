@@ -181,11 +181,9 @@ NDTjs.prototype.parseNdtMessage = function (buffer) {
     bufferArray,
     message;
 
-	console.log(buffer);
-//  try {
+//	try {
 		bufferArray = new Uint8Array(buffer, 0, 3);
-		message =  String.fromCharCode.apply(null,
-                                         new Uint8Array(buffer, 3, (buffer.length - 3)));
+		message =  String.fromCharCode.apply(null, new Uint8Array(buffer, 3, (buffer.byteLength - 3)));
 //  } catch (caughtError) {
 //    this.callbacks.onerror('TestFailureException');
 //	  throw new TestFailureException(caughtError, this.server);
