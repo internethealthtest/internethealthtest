@@ -193,7 +193,6 @@ NDTjs.prototype.parseNdtMessage = function (buffer) {
     response[i] = bufferArray[i];
   }
   response.push(message);
-  console.log(response, bufferArray, message);
   return response;
 };
 
@@ -669,7 +668,6 @@ NDTjs.prototype.startTest = function () {
   };
 
   ndtSocket.onerror = function (response) {
-    console.log('ndtSocket');
     //that.callbacks.onerror('ConnectionException');
     //throw new ConnectionException('ConnectionException', that.server);
   };
