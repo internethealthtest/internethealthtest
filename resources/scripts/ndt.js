@@ -181,13 +181,13 @@ NDTjs.prototype.parseNdtMessage = function (buffer) {
     bufferArray,
     message;
 	
-//	try {
+	try {
 		bufferArray = new Uint8Array(buffer, 0, 3);
 		message =  String.fromCharCode.apply(null, new Uint8Array(buffer, 3, (buffer.byteLength - 3)));
-//  } catch (caughtError) {
-//    this.callbacks.onerror('TestFailureException');
-//	  throw new TestFailureException(caughtError, this.server);
-//  }
+	} catch (caughtError) {
+		this.callbacks.onerror('TestFailureException');
+		throw new TestFailureException(caughtError, this.server);
+	}
 
   for (i = 0; i < 3; i += 1) {
     response[i] = bufferArray[i];
@@ -196,35 +196,6 @@ NDTjs.prototype.parseNdtMessage = function (buffer) {
   console.log(response, bufferArray, message);
   return response;
 };
-
-/**
- * Exception related to low-level connectivity failures.
- * @param {string} message Specific failure messages passed in the course of
- *  receiving the exception.
- */
-
-function ConnectionException(errorMessage, server) {
-  
-  this.reportFailureToMLab(errorMessage, server);
-  this.logger(errorMessage, true);
-};
-
-ConnectionException.prototype = Object.create(NDTjsException.prototype);
-ConnectionException.prototype.constructor = ConnectionException;
-
-/**
- * Exception related to an unsupported browser.
- * @param {string} message Specific failure messages passed in the course of
- *  receiving the exception.
- */
-function UnsupportedBrowser(errorMessage) {
-  
-  this.reportFailureToMLab(errorMessage, '');
-  this.logger(errorMessage, true);
-};
-
-UnsupportedBrowser.prototype = Object.create(NDTjsException.prototype);
-UnsupportedBrowser.prototype.constructor = UnsupportedBrowser;
 
 function NDTjsException() {};
 
@@ -277,6 +248,34 @@ function TestFailureException(message, server) {
 TestFailureException.prototype = Object.create(NDTjsException.prototype);
 TestFailureException.prototype.constructor = TestFailureException;
 
+/**
+ * Exception related to low-level connectivity failures.
+ * @param {string} message Specific failure messages passed in the course of
+ *  receiving the exception.
+ */
+
+function ConnectionException(errorMessage, server) {
+  
+  this.reportFailureToMLab(errorMessage, server);
+  this.logger(errorMessage, true);
+};
+
+ConnectionException.prototype = Object.create(NDTjsException.prototype);
+ConnectionException.prototype.constructor = ConnectionException;
+
+/**
+ * Exception related to an unsupported browser.
+ * @param {string} message Specific failure messages passed in the course of
+ *  receiving the exception.
+ */
+function UnsupportedBrowser(errorMessage) {
+  
+  this.reportFailureToMLab(errorMessage, '');
+  this.logger(errorMessage, true);
+};
+
+UnsupportedBrowser.prototype = Object.create(NDTjsException.prototype);
+UnsupportedBrowser.prototype.constructor = UnsupportedBrowser;
 
 /**
  * A simple helper function to create websockets consistently.
