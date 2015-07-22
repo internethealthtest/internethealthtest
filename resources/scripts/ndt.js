@@ -375,6 +375,7 @@ NDTjs.prototype.ndtC2sTest = function () {
       that.callbacks.onstatechange('finished_c2s', that.results);
       state = 'DONE';
       testConnection.close();
+      testConnection = undefined;
       return true;
     }
     that.logger('C2S: State = ' + state + ' type = ' + messageType + '(' +
