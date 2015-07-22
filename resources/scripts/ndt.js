@@ -193,6 +193,7 @@ NDTjs.prototype.parseNdtMessage = function (buffer) {
     response[i] = bufferArray[i];
   }
   response.push(message);
+	console.log(response, bufferArray, message);
   return response;
 };
 
