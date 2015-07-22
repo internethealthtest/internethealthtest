@@ -181,14 +181,14 @@ NDTjs.prototype.parseNdtMessage = function (buffer) {
     bufferArray,
     message;
 
-  try {
+//  try {
     bufferArray = new Uint8Array(buffer);
 		message =  String.fromCharCode.apply(null,
                                          new Uint8Array(buffer.slice(3)));
-  } catch (caughtError) {
-    this.callbacks.onerror('TestFailureException');
-	  throw new TestFailureException(caughtError, this.server);
-  }
+//  } catch (caughtError) {
+//    this.callbacks.onerror('TestFailureException');
+//	  throw new TestFailureException(caughtError, this.server);
+//  }
 
   for (i = 0; i < 3; i += 1) {
     response[i] = bufferArray[i];
@@ -681,28 +681,27 @@ NDTjs.prototype.startTest = function () {
 		module.exports = NDTjs;
 		WebSocket = require('ws');
     }
-})();
+	if ('ArrayBuffer' in window) {
+	  if (!ArrayBuffer.prototype.slice) {
+		ArrayBuffer.prototype.slice = function (begin, end) {
+		  var len = this.byteLength;
+		  begin = (begin|0) || 0;
+		  end = end === (void 0) ? len : (end|0);
 
-if ('ArrayBuffer' in window) {
-  if (!ArrayBuffer.prototype.slice) {
-	ArrayBuffer.prototype.slice = function (begin, end) {
-	  var len = this.byteLength;
-	  begin = (begin|0) || 0;
-	  end = end === (void 0) ? len : (end|0);
+		  // Handle negative values.
+		  if (begin < 0) begin = Math.max(begin + len, 0);
+		  if (end < 0) end = Math.max(end + len, 0);
 
-	  // Handle negative values.
-	  if (begin < 0) begin = Math.max(begin + len, 0);
-	  if (end < 0) end = Math.max(end + len, 0);
+		  if (len === 0 || begin >= len || begin >= end) {
+			return new ArrayBuffer(0);
+		  }
 
-	  if (len === 0 || begin >= len || begin >= end) {
-		return new ArrayBuffer(0);
+		  var length = Math.min(len - begin, end - begin);
+		  var target = new ArrayBuffer(length);
+		  var targetArray = new Uint8Array(target);
+		  targetArray.set(new Uint8Array(this, begin, length));
+		  return target;
+		};
 	  }
-
-	  var length = Math.min(len - begin, end - begin);
-	  var target = new ArrayBuffer(length);
-	  var targetArray = new Uint8Array(target);
-	  targetArray.set(new Uint8Array(this, begin, length));
-	  return target;
-	};
-  }
-}
+	}
+})();
