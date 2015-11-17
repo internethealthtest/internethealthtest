@@ -45,13 +45,15 @@ function InternetHealthTest() {
     'intro_overlay': this.canvas.find('.intro_overlay'),
     'intro_overlay_icon': this.canvas.find('.intro_overlay .intro_overlay_icon'),
     'intro_results': this.canvas.find('.intro_overlay .shared_results'),
-    'completion_overlay': this.canvas.find('.completion_overlay'),
-    'completion_results': this.canvas.find('.completion_overlay .shared_results'),
+    'share_overlay': this.canvas.find('.share_overlay'),
+    'share_results': this.canvas.find('.share_overlay .share_results__table'),
+    'advanced_results': this.canvas.find('.share_overlay .share_results__advanced_table'),
     'about_overlay': this.canvas.find('.about_overlay'),
     'about_overlay__mobile_warning': this.canvas.find('.intro_overlay  .ui-grid-a .ui-block-a'),
     'embed_overlay': this.canvas.find('.embed_overlay'),
     'performance_meter': this.canvas.find('.performance_meter'),
     'performance_meter_objects': this.canvas.find('.performance_meter div'),
+    'dashboard': this.canvas.find('.dashboard__result_list'),
     'result_list': this.canvas.find('.dashboard__result_list .ui-listview'),
     'result_list_item': this.canvas.find('.dashboard__result_list .ui-listview li'),
     'start_button': this.canvas.find('.dashboard__start_button'),
@@ -97,14 +99,14 @@ InternetHealthTest.prototype.setupInterface = function () {
   if (this.isMobile() === true) {
     this.domObjects.about_overlay__mobile_warning.addClass('mobile_warning');
   }
-  
+
   this.domObjects.intro_overlay.popup();
   this.domObjects.about_overlay.popup();
   this.domObjects.embed_overlay.popup();
   this.domObjects.start_button.button();
 
   if (this.checkBrowserSupport() === true) {
-    
+
     this.domObjects.start_button.button('enable');
     this.domObjects.start_button.focus();
     this.domObjects.performance_meter.percentageLoader({value: 'Upload'});
@@ -116,8 +118,7 @@ InternetHealthTest.prototype.setupInterface = function () {
 
     this.domObjects.start_button.click(function () {
       that.domObjects.intro_overlay.popup('close');
-      that.domObjects.completion_overlay.popup('close');
-      if (Object.keys(that.resultList).length > 0) {
+      if (Object.keys(that.resultList).length > 0 || Object.keys(that.shareableResults).length > 0) {
         that.resetDashboard();
       }
       that.domObjects.performance_meter.find('.percentage_text').addClass('smallertext');
@@ -144,7 +145,7 @@ InternetHealthTest.prototype.setupInterface = function () {
     this.domObjects.embed_button.click(function () {
       that.domObjects.embed_overlay.popup('open');
     });
-    
+
     if (url('?start') !== null) {
         autoStart = true;
         this.domObjects.intro_overlay.popup('close');
@@ -163,16 +164,19 @@ InternetHealthTest.prototype.setupInterface = function () {
       if (Object.keys(that.shareableResults).length > 0) {
         shareableInformation = this.processShareableResults(this.shareableResults);
         this.notifyShareableResults(shareableInformation, true);
+        this.notifyShareableLink(url(), false);
         this.domObjects.about_overlay__mobile_warning.removeClass('mobile_warning');
-        this.domObjects.intro_overlay_icon.hide();
-        this.domObjects.intro_results.show();
+        this.domObjects.start_button.val('Run Your Own Test!').button('refresh');
+        //this.domObjects.intro_overlay_icon.hide();
+        this.domObjects.share_overlay.show();
       }
     }
-    if ((that.historicalData.length === 0 || Object.keys(that.shareableResults).length > 0) && autoStart === false ) {
+    if ((that.historicalData.length === 0 && Object.keys(this.shareableResults).length === 0) && autoStart === false ) {
       window.setTimeout( function () {
         that.domObjects.intro_overlay.popup('open');
+        console.log('rawr');
         if (Object.keys(that.shareableResults).length > 0) {
-          that.createChart(that.shareableResults, true);
+          //that.createChart(that.shareableResults, true);
         }
       }, 1000);
     }
@@ -453,7 +457,7 @@ InternetHealthTest.prototype.onfinish = function (passedResults) {
   } else {
     this.shareableResults = this.packageShareableResults(this.resultList);
     shareableInformation = this.processShareableResults(this.shareableResults);
-    shareableInformation.link = 'https://www.battleforthenet.com/internethealthtest/?t=' + this.encodeShareableResults(this.shareableResults);
+    shareableInformation.link = 'http://www.internethealthtest.org/?t=' + this.encodeShareableResults(this.shareableResults);
     this.notifyShareableResults(shareableInformation, false);
     this.notifyServerQueueCompletion(shareableInformation);
     this.isRunning = false;
@@ -471,7 +475,7 @@ InternetHealthTest.prototype.onerror = function (passedError) {
   } else {
     this.shareableResults = this.packageShareableResults(this.resultList);
     shareableInformation = this.processShareableResults(this.shareableResults);
-    shareableInformation.link = 'https://www.battleforthenet.com/internethealthtest/?t=' + this.encodeShareableResults(this.shareableResults);
+    shareableInformation.link = 'http://www.internethealthtest.org/?t=' + this.encodeShareableResults(this.shareableResults);
     this.notifyShareableResults(shareableInformation, false);
     this.notifyServerQueueCompletion(shareableInformation);
     this.isRunning = false;
@@ -494,9 +498,9 @@ InternetHealthTest.prototype.notifyShareableLink = function (shareableInformatio
   introOverlay = introOverlay || false;
 
   if (introOverlay === true) {
-    targetOverlay = this.domObjects.intro_overlay;
+    targetOverlay = this.domObjects.share_overlay;
   } else {
-    targetOverlay = this.domObjects.completion_overlay;
+    targetOverlay = this.domObjects.share_overlay;
   }
 
   targetOverlay.find('.result_url_share').val(shareableInformation_link);
@@ -507,35 +511,54 @@ InternetHealthTest.prototype.notifyShareableLink = function (shareableInformatio
 InternetHealthTest.prototype.notifyShareableResults = function (shareableInformation, introOverlay) {
   introOverlay = introOverlay || false;
   var targetOverlay, targetOverlayResults;
-  
+  var self = this;
+
   if (introOverlay === true) {
-    targetOverlay = this.domObjects.intro_overlay;
-    targetOverlayResults = this.domObjects.intro_results;
+    targetOverlay = this.domObjects.share_overlay;
+    targetOverlayResults = this.domObjects.share_results;
   } else {
-    targetOverlay = this.domObjects.completion_overlay;
-    targetOverlayResults = this.domObjects.completion_results;
+    targetOverlay = this.domObjects.share_overlay;
+    targetOverlayResults = this.domObjects.share_results;
   }
   targetOverlayResults.find('.consistency span')
     .addClass(shareableInformation.consistency)
     .text(shareableInformation.consistency);
-  
+
+  targetOverlayResults.find('.average span')
+      .text(this.formatMeasurementResult('c2sRate', shareableInformation.mean));
   targetOverlayResults.find('.high span')
     .text(this.formatMeasurementResult('c2sRate', shareableInformation.high));
   targetOverlayResults.find('.low span')
     .text(this.formatMeasurementResult('c2sRate', shareableInformation.low));
-  
+
+  targetOverlayResults.find('.slow_links').hide();
   if (shareableInformation.slow_links.length === 0) {
     targetOverlayResults.find('.slow_links').hide();
   } else if (shareableInformation.slow_links.length === 1) {
-    targetOverlayResults.find('.slow_links h4').text('Potential slow down found on one connection.');
+    // targetOverlayResults.find('.slow_links').show();
+    targetOverlayResults.find('.slow_links').text('Potential slow down found on one connection.');
   } else if (shareableInformation.slow_links.length > 1) {
-    targetOverlayResults.find('.slow_links h4').text('Potential slow downs found on ' + shareableInformation.slow_links.length + ' connections.');
+    // targetOverlayResults.find('.slow_links').show();
+    targetOverlayResults.find('.slow_links small').text('Potential slow downs found on ' + shareableInformation.slow_links.length + ' connections.');
   }
-  
+
+  shareableInformation.measurements.forEach(function(measurement) {
+    var temporaryRow = $("<li>")
+      .text(measurement[0]); //
+    temporaryRow.append($("<span>")
+      .addClass('ui-li-count')
+      .addClass('ui-body-inherit')
+      .text(self.formatMeasurementResult('c2sRate', measurement[1]))); //
+    self.domObjects.advanced_results.append(temporaryRow);
+  });
+  this.domObjects.advanced_results.listview('refresh');
+
   if (shareableInformation.link !== undefined) {
     this.notifyShareableLink(shareableInformation.link, false);
     //this.shortenLink(shareableInformation.link);
   }
+  this.domObjects.dashboard.hide();
+  targetOverlayResults.show();
 };
 
 InternetHealthTest.prototype.processShareableResults = function (shareableResults) {
@@ -550,8 +573,9 @@ InternetHealthTest.prototype.processShareableResults = function (shareableResult
     'consistency': undefined,
     'slow_links': [],
     'time_run': shareableResults.time_run,
+    'measurements': []
   };
-  
+
   shareableResults.results.forEach(function (sharedResult) {
     if (shareableInformation.high === undefined ||
         sharedResult.s2cRate > shareableInformation.high) {
@@ -561,13 +585,15 @@ InternetHealthTest.prototype.processShareableResults = function (shareableResult
         sharedResult.s2cRate < shareableInformation.low) {
       shareableInformation.low = sharedResult.s2cRate;
     }
+    shareableInformation.measurements.push([sharedResult.siteTransit,
+        sharedResult.s2cRate, sharedResult.c2sRate])
     allResults.push(sharedResult.s2cRate);
   });
-  
+
   shareableInformation.mean = (allResults.reduce(function(a, b) { return a + b; }) / allResults.length);
   shareableInformation.median = findMedian(allResults);
   shareableInformation.rsdeviation = (standardDeviation(allResults) / shareableInformation.mean);
-  
+
   if (shareableInformation.rsdeviation > 0.8) {
     shareableInformation.consistency = 'poor';
   } else if (shareableInformation.rsdeviation > 0.4) {
@@ -577,7 +603,7 @@ InternetHealthTest.prototype.processShareableResults = function (shareableResult
   } else {
     shareableInformation.consistency = 'high';
   }
-  
+
   shareableResults.results.forEach(function (sharedResult, index) {
     if (sharedResult.s2cRate < (shareableInformation.mean * .6) ) {
       shareableInformation.slow_links.push(sharedResult.siteId);
@@ -589,7 +615,7 @@ InternetHealthTest.prototype.processShareableResults = function (shareableResult
 
 InternetHealthTest.prototype.unpackageShareableResults = function (passedString) {
   var sharedResultObject;
-  
+
   if (passedString.slice(-1) === '/') {
     passedString = passedString.slice(0, (passedString.length - 1))
   }
@@ -605,20 +631,20 @@ InternetHealthTest.prototype.createChart = function (shareableResults, introOver
   introOverlay = introOverlay || false;
   var chartContext, chartObject, chartDatasets, chartOptions, chartData, chartLabels;
   var targetOverlayResults;
-  
+
   if (introOverlay === true) {
     targetOverlayResults = this.domObjects.intro_results;
   } else {
-    targetOverlayResults = this.domObjects.completion_results;
+    targetOverlayResults = this.domObjects.share_results;
   }
-  
+
   chartLabels = $.map(shareableResults.results, function (shareableResult, index) {
     return '' //"Test " + index;
   });
   chartData = $.map(shareableResults.results, function (shareableResult, index) {
     return Number(shareableResult.s2cRate / 1000).toFixed(2);
   });
-  
+
   chartContext = targetOverlayResults.find(".test_series_chart").get(0).getContext("2d");
   chartData = {
       labels: chartLabels,
@@ -656,10 +682,10 @@ InternetHealthTest.prototype.packageShareableResults = function (resultList) {
     'time_run': Date.now(),
     'results': []
   };
-  
+
   this.serverList.forEach(function (siteId) {
     if (resultList.hasOwnProperty(siteId.id) === true) {
-      temporaryRow = {'siteId': siteId.id};
+      temporaryRow = {'siteId': siteId.id, 'siteTransit': siteId.transit};
       for (testResultValue in that.RESULTS_TO_DISPLAY) {
         if (that.RESULTS_TO_DISPLAY.hasOwnProperty(testResultValue)) {
           temporaryRow[testResultValue] = resultList[siteId.id][testResultValue];
@@ -670,7 +696,7 @@ InternetHealthTest.prototype.packageShareableResults = function (resultList) {
   });
   return shareableResults;
 };
-  
+
 InternetHealthTest.prototype.encodeShareableResults = function (shareableResults) {
   return window.btoa(unescape(encodeURIComponent(JSON.stringify(shareableResults))));
 };
@@ -696,8 +722,8 @@ InternetHealthTest.prototype.notifyServerQueueCompletion = function (shareableIn
   this.domObjects.start_button.val('Test Again').button('refresh');
   this.domObjects.start_button.button('enable');
 
-  this.domObjects.completion_overlay.popup('open');
-  this.createChart(this.shareableResults, false)
+  this.domObjects.share_overlay.show();
+  //this.createChart(this.shareableResults, false)
   this.domObjects.performance_meter.percentageLoader({value: 'Complete'});
   this.setProgressMeterCompleted();
 };
@@ -718,7 +744,7 @@ InternetHealthTest.prototype.notifyTestProgress = function (currentState,
       testProgressRate = 1;
     }
     testProgressRateText = testProgressRate.toFixed(0) + '%';
-    
+
     if (currentState === 'interval_s2c') {
       testPerformanceRateText = Number(testResult.s2cRate / 1000).toFixed(2) + ' Mbps';
     } else {
@@ -734,7 +760,7 @@ InternetHealthTest.prototype.notifyServerListUpdate = function (serverList) {
   var temporaryRow;
   var i = 1;
   var onclickTransit, onclickSiteId;
-  
+
   this.domObjects.server_list.text(this.mlabNsAnwer.city.replace('_', ' '));
 
   serverList.forEach(function (siteRecord) {
@@ -765,7 +791,10 @@ InternetHealthTest.prototype.resetDashboard = function () {
   this.serverQueue = this.serverList;
   this.resultList = {};
   this.domObjects.result_list.find('.provider').remove();
+  this.domObjects.advanced_results.find('li').remove();
   this.notifyServerListUpdate(this.serverQueue);
+  this.domObjects.dashboard.show();
+  this.domObjects.share_overlay.hide();
 };
 
 
@@ -776,7 +805,7 @@ InternetHealthTest.prototype.isMobile = function () {
 InternetHealthTest.prototype.notifyStateChange = function (newState, passedResults) {
 
   this.resetProgressMeter();
-  
+
   if (newState === 'preparing_s2c' || newState === 'preparing_c2s') {
     this.domObjects.performance_meter.find('.percentage_text').addClass('smallertext');
     this.domObjects.performance_meter.find('div div').text('Preparing');
@@ -804,7 +833,7 @@ InternetHealthTest.prototype.changeRowIcon = function (rowId, newIcon, classIcon
     oldIconClass = 'ui-icon-' + dataIcon,
     newIconClass = 'ui-icon-' + newIcon;
   var thisRow = this.domObjects.result_list.find(rowIdClass);
-  
+
   thisRow.attr('data-collapsed-icon', newIcon)
       .find('.ui-btn')
         .removeClass('ui-icon-clock')
@@ -913,24 +942,24 @@ function findMedian(data) {
 
 function standardDeviation(values){
   var avg = average(values);
-  
+
   var squareDiffs = values.map(function(value){
     var diff = value - avg;
     var sqrDiff = diff * diff;
     return sqrDiff;
   });
-  
+
   var avgSquareDiff = average(squareDiffs);
- 
+
   var stdDev = Math.sqrt(avgSquareDiff);
   return stdDev;
 }
- 
+
 function average(data){
   var sum = data.reduce(function(sum, value){
     return sum + value;
   }, 0);
- 
+
   var avg = sum / data.length;
   return avg;
 }
