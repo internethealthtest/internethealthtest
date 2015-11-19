@@ -18,6 +18,7 @@ function InternetHealthTest() {
   this.historicalData = [];
   this.shareableResults = {};
   this.currentServer = undefined;
+  this.specifiedMetro = undefined;
 
   // NDT's Test Length in milliseconds
   this.NDT_TEST_LENGTH = 10000;
@@ -158,7 +159,9 @@ InternetHealthTest.prototype.setupInterface = function () {
             }
         }, 500);
     }
-
+    if (url('?metro') !== null) {
+      this.specifiedMetro = url('?metro');
+    }
     if (url('?t') !== null) {
       this.shareableResults = this.unpackageShareableResults(url('?t'));
       if (Object.keys(that.shareableResults).length > 0) {
@@ -246,7 +249,9 @@ InternetHealthTest.prototype.findLocalServers = function (allServers) {
   var mlabNsRequest = new XMLHttpRequest(),
     mlabNsUrl = 'http://mlab-ns.appspot.com/ndt?format=json&policy=geo',
     that = this;
-
+  if (this.specifiedMetro !== undefined) {
+    mlabNsUrl = mlabNsUrl + '&metro=' +  this.specifiedMetro;
+  }
   mlabNsRequest.onreadystatechange = function () {
     if (mlabNsRequest.readyState === 4) {
       if (mlabNsRequest.status === 200) {
