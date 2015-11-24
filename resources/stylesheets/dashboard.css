@@ -351,3 +351,25 @@
   top: 1.2em;
   font-size: .8em;
 }
+.canvas ul.share_results__advanced_table .ui-btn-icon-notext {
+  width: 14px;
+  height: 14px;
+  line-height: normal;
+  padding: 0;
+}
+.canvas ul.share_results__advanced_table span.ui-li-count {
+  top: 40%;
+  border-width: 0px;
+  border-style: none;
+  /*padding: 0 .48em;
+  line-height: 1em;
+  min-height: 1em;
+  right: .8em;
+  margin-top: 0;*/
+}
+.canvas ul.share_results__advanced_table .ui-icon-arrow-d {
+  background-color: rgb(133, 232, 118);
+}
+/*.canvas ul.share_results__advanced_table .ui-icon-arrow-u {
+  background-color: rgb(133, 232, 118);
+}*/

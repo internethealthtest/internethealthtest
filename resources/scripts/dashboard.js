@@ -549,11 +549,34 @@ InternetHealthTest.prototype.notifyShareableResults = function (shareableInforma
 
   shareableInformation.measurements.forEach(function(measurement) {
     var temporaryRow = $("<li>")
-      .text(measurement[0]); //
-    temporaryRow.append($("<span>")
-      .addClass('ui-li-count')
-      .addClass('ui-body-inherit')
+        .text(measurement[0]); //
+    var temporarySpan = $("<span>")
+        .addClass('ui-body-inherit')
+        .addClass('ui-li-count')
+    temporarySpan.append( $("<span>")
+      .addClass('ui-btn')
+      .addClass('ui-btn-d')
+      .addClass('ui-shadow')
+      .addClass('ui-corner-all')
+      .addClass('ui-btn-inline')
+      .addClass('ui-icon-arrow-d')
+      .addClass('ui-btn-icon-notext')
+    ); //
+    temporarySpan.append( $("<span>")
+      .css('margin-right', '10px')
       .text(self.formatMeasurementResult('c2sRate', measurement[1]))); //
+    temporarySpan.append( $("<span>")
+      .addClass('ui-btn')
+      .addClass('ui-corner-all')
+      .addClass('ui-btn-inline')
+      .addClass('ui-icon-arrow-u')
+      .addClass('ui-btn-icon-notext')
+    ); //
+    temporarySpan.append( $("<span>")
+      .css('font-weight', 'normal')
+      .text(self.formatMeasurementResult('c2sRate', measurement[2]))); //
+
+    temporaryRow.append(temporarySpan);
     self.domObjects.advanced_results.append(temporaryRow);
   });
   this.domObjects.advanced_results.listview('refresh');
