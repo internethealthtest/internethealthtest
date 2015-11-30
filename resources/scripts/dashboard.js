@@ -9,6 +9,7 @@ function InternetHealthTest() {
   this.uaInformation = this.uaParser.getResult();
   this.serverQueue = [];
   this.serverList = [];
+  this.errorList = [];
   this.resultList = {};
   this.siteMap = {};
   this.isRunning = false;
@@ -63,6 +64,7 @@ function InternetHealthTest() {
     'about_button': this.canvas.find('.intro_overlay_about'),
     'embed_button': this.canvas.find('.intro_overlay_embed'),
     'supported_browser_dialogue': this.canvas.find('.supported_browser_dialogue'),
+    'tests_failed_dialogue': this.canvas.find('.tests_failed_dialogue'),
     'measurement_panel': this.canvas.find('.panel__measurement_results'),
     'measurement_panel_list': this.canvas.find('.panel__measurement_results  .ui-listview')
   };
@@ -473,10 +475,22 @@ InternetHealthTest.prototype.onerror = function (passedError) {
   var currentServer, shareableInformation;
 
   this.notifyTestError(this.currentServer);
+  this.errorList.push(this.currentServer);
 
   if (this.serverQueue.length > 0) {
     currentServer = this.serverQueue.shift();
     this.runTest(currentServer);
+  } else if ( this.serverQueue.length == 0  &&
+      this.errorList.length == this.serverList.length) {
+    this.domObjects.tests_failed_dialogue.popup('open');
+    this.isRunning = false;
+    this.errorList = [];
+
+    this.domObjects.performance_meter.addClass('test_control_enabled');
+    this.domObjects.performance_meter.addClass('test_control_enabled');
+    this.domObjects.start_button.val('Test Again').button('refresh');
+    this.domObjects.start_button.button('enable');
+    // console.log('All tests failed to complete.');
   } else {
     this.shareableResults = this.packageShareableResults(this.resultList);
     shareableInformation = this.processShareableResults(this.shareableResults);
@@ -762,7 +776,8 @@ InternetHealthTest.prototype.notifyTestProgress = function (currentState,
   var testProgressRateText;
   var testPerformanceRateText;
 
-  if (currentState === 'interval_s2c' || currentState === 'interval_c2s') {
+  if ( (currentState === 'interval_s2c' || currentState === 'interval_c2s') &&
+        this.isRunning === true) {
     // Sometimes the callback can run over the alloted time, our progress
     // metric is an approximation.
 

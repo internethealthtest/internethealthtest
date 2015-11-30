@@ -72,7 +72,7 @@ function NDTjs(server, serverPort, serverPath, callbacks, updateInterval, debugL
 /**
  * Provide feedback to the console or the DOM.
  * @param {string} logMessage Message to pass to output mechanism.
- * @param {!boolean=} debugging Optional (may be undefined) Determines whether 
+ * @param {!boolean=} debugging Optional (may be undefined) Determines whether
  *  to output messages or to operate silently.
  */
 NDTjs.prototype.logger = function (logMessage, debugging) {
@@ -149,7 +149,7 @@ NDTjs.prototype.makeLoginMessage = function (desiredTests) {
 /**
  * A generic message creation system for NDT.
  * (messageType, message body length [2], message body)
- * @params {number} messageType The type of message according to NDT's 
+ * @params {number} messageType The type of message according to NDT's
  *  specification.
  * @params {string} messageContent The message body.
  * @returns {array} An array of bytes suitable for sending on a binary
@@ -180,7 +180,7 @@ NDTjs.prototype.parseNdtMessage = function (buffer) {
     response = [],
     bufferArray,
     message;
-	
+
 	try {
 		bufferArray = new Uint8Array(buffer, 0, 3);
 		message =  String.fromCharCode.apply(null, new Uint8Array(buffer, 3, (buffer.byteLength - 3)));
@@ -211,13 +211,13 @@ NDTjsException.prototype.reportFailureToMLab = function (passedError, mlabServer
       diagnosticInformationString = '',
       iterationKey,
       diagnosticAddress;
-  
+
   for (iterationKey in diagnosticInformation) {
     if (diagnosticInformation.hasOwnProperty(iterationKey)) {
       diagnosticInformationString += iterationKey + '=' + encodeURIComponent(diagnosticInformation[iterationKey]) + '&';
     }
   }
-  
+
   diagnosticAddress = 'https://mlab-error.appspot.com/?' + diagnosticInformationString;
   diagnosticRequest.open('GET', diagnosticAddress, true);
   diagnosticRequest.send();
@@ -239,7 +239,7 @@ NDTjsException.prototype.logger = function (logMessage, debugging) {
  *  receiving the exception.
  */
 function TestFailureException(message, server) {
-  
+
   this.reportFailureToMLab(message, server);
   this.logger(message, true);
 };
@@ -254,7 +254,7 @@ TestFailureException.prototype.constructor = TestFailureException;
  */
 
 function ConnectionException(errorMessage, server) {
-  
+
   this.reportFailureToMLab(errorMessage, server);
   this.logger(errorMessage, true);
 };
@@ -268,7 +268,7 @@ ConnectionException.prototype.constructor = ConnectionException;
  *  receiving the exception.
  */
 function UnsupportedBrowser(errorMessage) {
-  
+
   this.reportFailureToMLab(errorMessage, '');
   this.logger(errorMessage, true);
 };
@@ -297,7 +297,7 @@ NDTjs.prototype.createWebsocket = function (serverAddress, serverPort, urlPath,
 /**
  * NDT's Client-to-Server (C2S) Upload Test
  * Serves as a closure that will process all messages for the C2S NDT test.
- * @returns {boolean} The test is complete and the closure should no longer 
+ * @returns {boolean} The test is complete and the closure should no longer
  *    be called.
  */
 NDTjs.prototype.ndtC2sTest = function () {
@@ -341,7 +341,7 @@ NDTjs.prototype.ndtC2sTest = function () {
   };
 
   /**
-   * The closure that processes messages on the control socket for the 
+   * The closure that processes messages on the control socket for the
    * C2S test.
    */
   return function (messageType, messageContent) {
@@ -354,6 +354,13 @@ NDTjs.prototype.ndtC2sTest = function () {
       serverPort = Number(messageContent.msg);
       testConnection = that.createWebsocket(that.server, serverPort,
                                             that.serverPath, 'c2s');
+      testConnection.onclose = function () {
+        if (state !== 'WAIT_FOR_TEST_MSG' && state !== 'WAIT_FOR_TEST_FINALIZE') {
+          console.log("Closed without change of state on C2S, probably could not " +
+              "connect to remote server. ("+ state +")");
+          that.callbacks.onerror('ConnectionFailureException');
+        }
+      };
       state = 'WAIT_FOR_TEST_START';
       return false;
     }
@@ -387,7 +394,7 @@ NDTjs.prototype.ndtC2sTest = function () {
  * NDT's Server-to-Client (S2C) Download Test
  * Serves as a closure that will process all messages for the S2C NDT test.
  * @param {Websocket} ndtSocket A websocket connection to the NDT server.
- * @returns {boolean} The test is complete and the closure should no longer 
+ * @returns {boolean} The test is complete and the closure should no longer
  *    be called.
  */
 NDTjs.prototype.ndtS2cTest = function (ndtSocket) {
@@ -398,7 +405,7 @@ NDTjs.prototype.ndtS2cTest = function (ndtSocket) {
     that = this;
 
   /**
-  * The closure that processes messages on the control socket for the 
+  * The closure that processes messages on the control socket for the
   * C2S test.
   */
   return function (messageType, messageContent) {
@@ -425,10 +432,10 @@ NDTjs.prototype.ndtS2cTest = function (ndtSocket) {
         } else {
           hdrSize = 10;
         }
-		
-		
+
+
 		byteLength = (response.data.byteLength !== undefined) ? response.data.byteLength : response.data.length;
-		
+
         receivedBytes += (hdrSize + byteLength);
         currentTime = Date.now() / 1000.0;
         if (that.updateInterval && currentTime > (testStart + nextCallback)) {
@@ -443,6 +450,14 @@ NDTjs.prototype.ndtS2cTest = function (ndtSocket) {
       testConnection.onerror = function (response) {
         //that.callbacks.onerror('ConnectionException');
         //throw new ConnectionException('ConnectionException', that.server);
+      };
+      testConnection.onclose = function () {
+        if (state !== 'DONE' && state !== 'WAIT_FOR_TEST_MSG_OR_TEST_FINISH' &&
+            state !== 'WAIT_FOR_FIRST_TEST_MSG') {
+          console.log("Closed without change of state S2C, probably could not " +
+              "connect to remote server. ("+ state +")");
+          that.callbacks.onerror('ConnectionFailureException');
+        }
       };
 
       state = 'WAIT_FOR_TEST_START';
@@ -488,6 +503,7 @@ NDTjs.prototype.ndtS2cTest = function (ndtSocket) {
         messageType === that.TEST_FINALIZE) {
       that.callbacks.onstatechange('finished_s2c', that.results);
       that.logger('NDT S2C test is complete: ' +  messageContent.msg);
+      state = 'DONE'
       return true;
     }
     that.logger('S2C: State = ' + state + ' type = ' + messageType + '(' +
@@ -497,7 +513,7 @@ NDTjs.prototype.ndtS2cTest = function (ndtSocket) {
 
 /**
  * NDT's META (S2C) Download Test
- * Serves as a closure that will process all messages for the META NDT test, 
+ * Serves as a closure that will process all messages for the META NDT test,
  *    which provides additional data to the NDT results.
  * @param {Websocket} ndtSocket A websocket connection to the NDT server.
  * @returns {boolean} The test is complete and the closure should no longer
@@ -570,7 +586,13 @@ NDTjs.prototype.startTest = function () {
     ndtSocket.send(that.makeLoginMessage(2 | 4 | 32));
     state = 'LOGIN_SENT';
   };
-
+  ndtSocket.onclose = function () {
+    if (state !== 'DONE') {
+      console.log("Closed without change of state on control socket, probably could not " +
+          "connect to remote server. (" + state + ")");
+      that.callbacks.onerror('ConnectionFailureException');
+    }
+  };
   /** Process a message received on the NDT control socket.  The message should
    * be handed off to the active test (if any), or processed directly if there
    * is no active test.
@@ -656,6 +678,7 @@ NDTjs.prototype.startTest = function () {
       }
     } else if (state === 'WAIT_FOR_MSG_RESULTS' &&
                messageType === that.MSG_LOGOUT) {
+      state = 'DONE'
       ndtSocket.close();
       that.callbacks.onstatechange('finished_all', that.results);
       that.callbacks.onfinish(that.results);
