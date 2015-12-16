@@ -223,7 +223,7 @@
   text-decoration: none;
   text-shadow: rgb(243, 243, 243) 0px 1px 0px;
 }
-.canvas .select__server_location {
+.canvas .select__server_location, .canvas .select__client_location {
     color: #777;
 }
 

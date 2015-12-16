@@ -16,6 +16,7 @@ function InternetHealthTest() {
   this.canvas = $('.canvas');
   this.lastStateChange = undefined;
   this.mlabNsAnwer = undefined;
+  this.locationAnswer = undefined;
   this.historicalData = [];
   this.shareableResults = {};
   this.currentServer = undefined;
@@ -60,6 +61,7 @@ function InternetHealthTest() {
     'result_list_item': this.canvas.find('.dashboard__result_list .ui-listview li'),
     'start_button': this.canvas.find('.dashboard__start_button'),
     'server_list': this.canvas.find('.select__server_location'),
+    'client_location': this.canvas.find('.select__client_location'),
     'historical_information': this.canvas.find('.historical_information'),
     'about_button': this.canvas.find('.intro_overlay_about'),
     'embed_button': this.canvas.find('.intro_overlay_embed'),
@@ -244,7 +246,23 @@ InternetHealthTest.prototype.shortenLink = function (sharedUrl) {
         return v.data.url;
       }
     });
-}
+};
+
+InternetHealthTest.prototype.findLocation = function (allServers) {
+  var mlabNsRequest = new XMLHttpRequest(),
+    mlabNsUrl = 'https://measure-location.appspot.com/',
+    that = this;
+  mlabNsRequest.onreadystatechange = function () {
+    if (mlabNsRequest.readyState === 4) {
+      if (mlabNsRequest.status === 200) {
+        that.locationAnswer = JSON.parse(mlabNsRequest.responseText);
+        that.domObjects.client_location.text(that.locationAnswer.metro_code);
+      }
+    }
+  };
+  mlabNsRequest.open("GET", mlabNsUrl, true);
+  mlabNsRequest.send();
+};
 
 
 InternetHealthTest.prototype.findLocalServers = function (allServers) {
@@ -966,6 +984,7 @@ InternetHealthTest.prototype.shuffleArray = function (passedArray) {
 $(document).ready(function () {
   var dashboard = new InternetHealthTest();
   dashboard.findAllServers();
+  dashboard.findLocation();
 });
 
 function findMedian(data) {
